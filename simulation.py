@@ -179,6 +179,7 @@ class ParamSimulation(dict):
             self.load_params()
         return self[parametre]
 
+
 class Simulation():
     """
     Loads the data of all signals in white list for a simulation.
@@ -261,6 +262,7 @@ class Simulation():
 
     def is_data_loaded(self):
         return self._data_loaded
+
 
 class Simulations():
     """

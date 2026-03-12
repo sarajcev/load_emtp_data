@@ -6,8 +6,9 @@ import re
 
 class PssParams(dict):
     """
-    reads a .pss file associated to a parametric Simulation
-    creates a dictionnary containing parameters and associated number of values
+    Reads a .pss file associated with a parametric Simulation.
+    Creates a dictionnary containing parameters and associated
+    number of values.
     """ 
 
     def __init__(self, path):
@@ -29,7 +30,7 @@ class PssParams(dict):
 
     def _read(self, line):
         """ 
-        reads the pss file with is a correputed XML file
+        Reads the pss file with is a correputed XML file.
         """
         if '<VariationGroup>' in line:
             if self._first_time:
@@ -53,7 +54,7 @@ class PssParams(dict):
         
     def _filter(self):
         """
-        Reverse order of values
+        Reverse order of values.
         """
         for table in self._values:
             table.reverse()

@@ -12,8 +12,9 @@ from matplotlib import pyplot as plt
 
 class ParamSimulation(dict):
     """
-    reads .m file, loads parameters and associated values
-    determines position in .mda file of all signals in white_list
+    Reads .m file, loads parameters and associated values.
+    Determines position in .mda file of all signals in a
+    `white_list` vraibale.
     """
 
     def __init__(self, mfile_path, white_list):
@@ -33,7 +34,8 @@ class ParamSimulation(dict):
 
     def load_params(self):
         """
-        read the .m file line by line and loads parameters and associated values
+        Read the .m file line by line and loads
+        parameters and associated values.
          """
         with open(self._mfile, "r") as f:
             for line in f:
@@ -44,7 +46,8 @@ class ParamSimulation(dict):
 
     def load_signals_and_positions(self):
         """
-        loads the list of signals in white_list and their position in .mda file
+        Loads the list of signals in `white_list` variable
+        and their position in the .mda file.
         """
         for [param, link] in self._signals_to_load:
             self.load_signals_and_positions_for_specific_param(param, link)
@@ -59,15 +62,17 @@ class ParamSimulation(dict):
 
     def insert(self, param, value):
         """
-        inserts a key and the associated value
+        Inserts a key and the associated value.
         """
         self.setdefault(param, []).append(value)
 
     def insert_equality(self, line):
         """
-        for a line which is a simple equality
-        inserts the key and its value
-        checks that second line of .m file is already parsed if so finds domain and prepare for loading signals and positions 
+        For a line which is a simple equality
+        inserts the key and its value.
+        Checks that second line of .m file is already
+        parsed if so finds domain and prepare for loading
+        signals and positions.
         """
         self._index_domain += 1
         line = line.split("=")
@@ -80,8 +85,8 @@ class ParamSimulation(dict):
 
     def insert_strvcat(self, line):
         """
-        for a line which contains strvcat
-        inserts the key and its value
+        Ror a line which contains strvcat
+        inserts the key and its value.
         """
         line = line.split("'")
         value = line[1]
@@ -91,8 +96,8 @@ class ParamSimulation(dict):
 
     def insert_vector(self, line):
         """
-        for a line which contains a vector
-        inserts the key and its value
+        For a line which contains a vector
+        inserts the key and its value.
         """
         line = line.split('=')
         param = line[0]
@@ -105,11 +110,13 @@ class ParamSimulation(dict):
 
     def pre_load_signals_and_positions(self, param, signal):
         """
-        if signal is in white_list, finds the link
-        for param Nvn, the link is vn (for time domain) or vnmag (for frequency domain)
-        for param Nis, the link is is  (for time domain) or ismag (for frequency domain)
+        If signal is in `white_list` variable, finds the link.
+        For param Nvn, the link is vn (for time domain)
+        or vnmag (for frequency domain).
+        For param Nis, the link is is  (for time domain)
+        or ismag (for frequency domain).
         ...
-        the link is necessary to determine its position 
+        The link is necessary to determine its position.
         """
         if signal in self._white_list:
             link = list(param)
@@ -123,7 +130,7 @@ class ParamSimulation(dict):
 
     def get_domain(self):
         """
-        finds the domain (frequency or time)
+        Finds the domain (frequency or time).
         """
         if self._domain_initialized is False:
             if 'f' in self.keys():
@@ -134,12 +141,14 @@ class ParamSimulation(dict):
                 self._domain_initialized = True
             else:
                 self.domain = 'u'
-                print('error : domain unknown')
+                print('Error : Domain unknown.')
   
     def load_signals_and_positions_for_specific_param(self, param, link):
         """
-        computes the list of signals and position for one specific parameter
-        list is ordered by position of signal in white_list
+        Computes the list of signals and position
+        for one specific parameter.
+        List is ordered by position of signal in
+        the `white_list` variable.
         """
         index = 0
         for signal in self.get(param):
@@ -151,8 +160,10 @@ class ParamSimulation(dict):
 
     def intersect_white_list_mfile(self):
         """
-        creates a list of signals that are both in white list and .m file
-        (if user entered in the whitelist a signal that is not in the .m file, its data should not be loaded)
+        Creates a list of signals that are both in
+        the "white list" and the .m file (if user entered
+        in the whitelist a signal that is not in the .m file,
+        its data should not be loaded).
         """
         for signal in self._white_list:
             for (signal,line) in self._signals_and_positions:
@@ -162,7 +173,7 @@ class ParamSimulation(dict):
     def get(self, parametre):
         """
         Returns the values of a loaded parameter
-        if the .m file is not loaded, loads it
+        if the .m file is not loaded, loads it.
         """
         if not self._params_loaded:
             self.load_params()
@@ -170,7 +181,7 @@ class ParamSimulation(dict):
 
 class Simulation():
     """
-        loads the data of all signals in white list for a simulation
+    Loads the data of all signals in white list for a simulation.
     """
 
     def __init__(self, mda_path, m_path, white_list):
@@ -188,7 +199,7 @@ class Simulation():
 
     def load_data(self):
         """
-        loads the signals' values in data and computes overshoot
+        Loads the signals' values in data and computes overshoot.
         """
         it = 0
         try:
@@ -218,7 +229,7 @@ class Simulation():
 
     def get(self, signal):
         """
-            returns the value of a signal
+        Returns the value of a signal.
         """
         signal_found = False
         position_in_white_list = -1
@@ -228,7 +239,7 @@ class Simulation():
                 signal_found = True
                 return self._data[position_in_white_list]
         if signal_found is False:
-            return "signal not found"
+            return "Signal not found!"
 
     def get_ftmin(self):
         return self._ftmin
@@ -253,7 +264,8 @@ class Simulation():
 
 class Simulations():
     """
-        loads the data of all signals in white list for a tree of simulations
+    Loads the data of all signals in "white list"
+    for a tree of simulations.
     """
 
     def __init__(self, simulation_path, name, white_list):
@@ -279,14 +291,14 @@ class Simulations():
 
     def build_all_simulations(self):
         start_loading = timer()
-        print('loading data')
+        print('Loading data ...')
         index = -1
         for mda_path, m_path in zip(self._mda_paths, self._m_paths): # iterate over all simulations
             index += 1
             s = Simulation(mda_path, m_path, self._white_list) # build simulation
             self._simulations[index] = s # adds simulation in list of simulations
             s.load_data() #loads simulation
-        print("total loading {}".format(timer() - start_loading))
+        print("Total loading: {}".format(timer() - start_loading))
         self.pass_simulation_parameters()
         
     def pass_simulation_parameters(self):

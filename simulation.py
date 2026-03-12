@@ -196,7 +196,7 @@ class Simulation():
         self._ft16 = 0
         self._ftdelta = 0
         self._ftmax = 0
-        self._data = [[0] for i in range(len(self._m._signals_and_positions))]
+        self._data = [[] for i in range(len(self._m._signals_and_positions))]
 
     def load_data(self):
         """
@@ -211,14 +211,12 @@ class Simulation():
                     values = self._m._signals_and_positions[j]
                     name, line = values
                     if it==0:
-                        self._data[j][it] = mda_ft[line-1]
                         self._ftmin = int(mda_ft[0])
                     if it==15:
                         self._ft15 = mda_ft[0]
                     if it==16:
                         self._ft16 = mda_ft[0]
-                    else:
-                        self._data[j].append(mda_ft[line-1])
+                    self._data[j].append(mda_ft[line-1])
                 it += 1
         except TypeError:
             pass
@@ -227,6 +225,7 @@ class Simulation():
         self._ftrange=int(self._ftmax-self._ftmin)
         self._ftdelta = self._ft16-self._ft15
         self._data=np.array(self._data)
+        self._ft=np.array(self._ft)
 
     def get(self, signal):
         """
@@ -315,3 +314,4 @@ class Simulations():
 
     def get_simulations(self):
         return self._simulations
+

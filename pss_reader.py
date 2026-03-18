@@ -7,7 +7,7 @@ import re
 class PssParams(dict):
     """
     Reads a .pss file associated with a parametric Simulation.
-    Creates a dictionnary containing parameters and associated
+    Creates a dictionary containing parameters and associated
     number of values.
     """ 
 

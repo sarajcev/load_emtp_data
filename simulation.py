@@ -4,6 +4,7 @@ Copyright 2018 Albane Schwob
 
 # -*- coding: utf-8 -*-
 import numpy as np
+import pandas as pd
 from scipy.io import FortranFile
 import glob
 from timeit import default_timer as timer
@@ -261,6 +262,20 @@ class Simulation():
 
     def is_data_loaded(self):
         return self._data_loaded
+    
+    def to_dataframe(self):
+        """
+        Return signals from the "white list"
+        as a pandas DataFrame.
+        """
+        data_dict = {}
+        data_dict['time'] = self._ft
+        for name in self._white_list:
+            signal = self.get(name)
+            data_dict[name] = signal
+        # DataFrame    
+        data = pd.DataFrame(data_dict, copy=True)
+        return data
 
 
 class Simulations():

@@ -292,7 +292,7 @@ class Simulations():
         ----------
         simulation_path : str
             File path for the simulation files that points
-            to the directory containing CP_00001 ...
+            to the directory tree containing CP_00001 ...
             directories with simulation files.
         name : str
             EMTP model file name without extension; this
@@ -302,7 +302,8 @@ class Simulations():
             the simulation that will be extracted.
         """
         self._white_list = white_list
-        self._CP_paths = glob.glob(simulation_path+ '/CP*')
+        # TODO: Replace 'CP' with 'Run1' for our case.
+        self._CP_paths = glob.glob(simulation_path + '/CP*')
         self._nb_simu_tot = len(self._CP_paths)
         self._m_paths = []
         self._mda_paths = []

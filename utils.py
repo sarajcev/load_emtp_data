@@ -2,6 +2,38 @@ import re
 import matplotlib.pylab as plt
 
 
+def create_white_list(prefix, sufixes, black):
+    """
+    Create a `white_list` variable for the machine
+    signals.
+
+    Parameters
+    ----------
+    prefix : str, default='PowerPlant_
+        Common prefix for the machine names.
+    sufixes : list
+        List of machine variable names that will
+        be in the `white_list` variable.
+    black : list
+        List of indexes for the machine that are
+        excluded from the simulation.
+    
+    returns
+    -------
+    white_list : list
+        List with a variable names for the simulation.
+    """
+    # Form a "white list" of variable names.
+    white_list = []
+    for sufix in sufixes:
+        white_list.extend(
+            [prefix + f'{i+1:02d}' + sufix 
+            for i in range(9) 
+            if i not in black]
+        )
+    return white_list
+
+
 def plot_machine_signals(data, category):
     """
     Plot EMTP-RV simulation signals for the machines.

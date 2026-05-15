@@ -266,7 +266,7 @@ class Simulation():
     def to_dataframe(self):
         """
         Return signals from the "white list"
-        as a pandas DataFrame.
+        variable as a pandas DataFrame.
         """
         data_dict = {}
         data_dict['time'] = self._ft
@@ -285,6 +285,18 @@ class Simulations():
     """
 
     def __init__(self, simulation_path, name, white_list):
+        """
+        Parameters
+        ----------
+        simulation_path : str
+            File path for the simulation files.
+        name : str
+            EMTP model file name without extension; this
+            name is inherited by the .m and .mda files.
+        white_list : list
+            List of variable names for the signals from
+            the simulation that will be extracted.
+        """
         self._white_list = white_list
         self._CP_paths = glob.glob(simulation_path+ '/CP*')
         self._nb_simu_tot = len(self._CP_paths)

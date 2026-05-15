@@ -281,7 +281,9 @@ class Simulation():
 class Simulations():
     """
     Loads the data of all signals in "white list"
-    for a tree of simulations.
+    for a tree of simulations. Class is built for
+    traversing the entire directory tree built by
+    the Parametric Studio.
     """
 
     def __init__(self, simulation_path, name, white_list):
@@ -289,7 +291,9 @@ class Simulations():
         Parameters
         ----------
         simulation_path : str
-            File path for the simulation files.
+            File path for the simulation files that points
+            to the directory containing CP_00001 ...
+            directories with simulation files.
         name : str
             EMTP model file name without extension; this
             name is inherited by the .m and .mda files.

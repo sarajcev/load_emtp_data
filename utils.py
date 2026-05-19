@@ -2,21 +2,22 @@ import re
 import matplotlib.pylab as plt
 
 
-def create_white_list(prefix, sufixes, black):
+def create_white_list(varnames, black, buses):
     """
-    Create a `white_list` variable for the machine
-    signals.
+    Create a `white_list` variable for extracting
+    EMTP simulations signals.
 
     Parameters
     ----------
-    prefix : str, default='PowerPlant_
-        Common prefix for the machine names.
-    sufixes : list
+    varnames : list
         List of machine variable names that will
         be in the `white_list` variable.
     black : list
-        List of indexes for the machine that are
+        List of indexes for the machines that are
         excluded from the simulation.
+    buses : list
+        List of bus indexes that have voltage
+        measurements.
     
     returns
     -------
@@ -25,9 +26,18 @@ def create_white_list(prefix, sufixes, black):
     """
     # Form a "white list" of variable names.
     white_list = []
-    for sufix in sufixes:
+    # Bus voltages.
+    for bus in buses:
+        busa = 'BUS' + str(bus) + '/Vrms_a'
+        white_list.append(busa)
+        busb = 'BUS' + str(bus) + '/Vrms_b'
+        white_list.append(busb)
+        busc = 'BUS' + str(bus) + '/Vrms_c'
+        white_list.append(busc)
+    # Machine signals.
+    for name in varnames:
         white_list.extend(
-            [prefix + f'{i+1:02d}' + sufix 
+            ['PowerPlant_' + f'{i+1:02d}' + name 
             for i in range(10) 
             if i not in black]
         )
@@ -114,7 +124,8 @@ def plot_machine_delta_signals(data):
             if pp == '02':
                 continue
             else:
-                ax.plot(time, slack_signal-signal, ls='-', lw=1.5, label=name.split('/')[0])
+                ax.plot(time, slack_signal-signal, ls='-', lw=1.5,
+                        label=name.split('/')[0])
     ax.legend(loc='upper left', frameon=True, fancybox=True, fontsize=8)
     ax.grid(which='major', axis='both')
     ax.set_xlabel('Time (s)')
@@ -131,11 +142,23 @@ def plot_bus_voltages_rms(data, bus):
     ----------
     data : DataFrame
         Pandas DataFrame holding simulation signals.
-    bus : int
-        Index of the bus.
+    bus : str
+        Name of the bus, e.g. 'BUS2'.
     
     Returns
     -------
     Show matplotlib figure.
     """
+    time = data['time'].values
+    fig, ax = plt.subplots(figsize=(6.5, 3.5))
+    ax.set_title(f'RMS voltage at: {bus}', fontsize=10)
+    ax.plot(time, data[bus+'/Vrms_a'], ls='-', lw=1.5, label='Vrms_a')
+    ax.plot(time, data[bus+'/Vrms_b'], ls='-', lw=1.5, label='Vrms_b')
+    ax.plot(time, data[bus+'/Vrms_c'], ls='-', lw=1.5, label='Vrms_c')
+    ax.legend(loc='lower right', frameon=True, fancybox=True, fontsize=8)
+    ax.grid(which='major', axis='both')
+    ax.set_xlabel('Time (s)')
+    ax.set_ylabel('RMS voltage (p.u.)')
+    fig.tight_layout()
+    plt.show()
     return

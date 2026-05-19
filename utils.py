@@ -2,7 +2,7 @@ import re
 import matplotlib.pylab as plt
 
 
-def create_white_list(varnames, black, buses):
+def create_white_list(varnames, exclude, buses):
     """
     Create a `white_list` variable for extracting
     EMTP simulations signals.
@@ -12,7 +12,7 @@ def create_white_list(varnames, black, buses):
     varnames : list
         List of machine variable names that will
         be in the `white_list` variable.
-    black : list
+    exclude : list
         List of indexes for the machines that are
         excluded from the simulation.
     buses : list
@@ -22,24 +22,30 @@ def create_white_list(varnames, black, buses):
     returns
     -------
     white_list : list
-        List with a variable names for the simulation.
+        List with variable names for the simulation.
     """
     # Form a "white list" of variable names.
     white_list = []
     # Bus voltages.
     for bus in buses:
+        # Phase a, b and c values.
         busa = 'BUS' + str(bus) + '/Vrms_a'
         white_list.append(busa)
         busb = 'BUS' + str(bus) + '/Vrms_b'
         white_list.append(busb)
         busc = 'BUS' + str(bus) + '/Vrms_c'
         white_list.append(busc)
+        # Direct sequence magnitude and phase angle.
+        mag = 'BUS' + str(bus) + '/V1_mag'
+        white_list.append(mag)
+        phase = 'BUS' + str(bus) + '/V1_phase'
+        white_list.append(phase)
     # Machine signals.
     for name in varnames:
         white_list.extend(
             ['PowerPlant_' + f'{i+1:02d}' + name 
             for i in range(10) 
-            if i not in black]
+            if i not in exclude]
         )
     return white_list
 
@@ -76,7 +82,7 @@ def plot_machine_signals(data, category):
         if string is not None:
             signal = data[name].values
             ax.plot(time, signal, ls='-', lw=1.5, label=name.split('/')[0])
-    ax.legend(loc='upper left', frameon=True, fancybox=True, fontsize=8)
+    ax.legend(loc='upper right', frameon=True, fancybox=True, fontsize=8)
     ax.grid(which='major', axis='both')
     ax.set_xlabel('Time (s)')
     ax.set_ylabel(category)
@@ -126,7 +132,7 @@ def plot_machine_delta_signals(data):
             else:
                 ax.plot(time, slack_signal-signal, ls='-', lw=1.5,
                         label=name.split('/')[0])
-    ax.legend(loc='upper left', frameon=True, fancybox=True, fontsize=8)
+    ax.legend(loc='upper right', frameon=True, fancybox=True, fontsize=8)
     ax.grid(which='major', axis='both')
     ax.set_xlabel('Time (s)')
     fig.tight_layout()

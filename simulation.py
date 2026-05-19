@@ -302,8 +302,7 @@ class Simulations():
             the simulation that will be extracted.
         """
         self._white_list = white_list
-        # TODO: Replace 'CP' with 'Run1' for our case.
-        self._CP_paths = glob.glob(simulation_path + '/CP*')
+        self._CP_paths = glob.glob(simulation_path + '/Run1*')
         self._nb_simu_tot = len(self._CP_paths)
         self._m_paths = []
         self._mda_paths = []

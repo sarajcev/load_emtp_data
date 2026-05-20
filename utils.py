@@ -44,7 +44,7 @@ def create_white_list(varnames, exclude, buses):
     for name in varnames:
         white_list.extend(
             ['PowerPlant_' + f'{i:02d}' + name 
-            for i in range(1, 11) 
+            for i in range(1, 11) # ten machines
             if i not in exclude]
         )
     return white_list
@@ -129,7 +129,8 @@ def plot_machine_delta_signals(data):
             if pp == '02':
                 continue
             else:
-                ax.plot(time, slack_signal-signal, ls='-', lw=1.5,
+                delta_signal = slack_signal - signal
+                ax.plot(time, delta_signal, ls='-', lw=1.5,
                         label=name.split('/')[0])
     ax.legend(loc='upper right', frameon=True, fancybox=True, fontsize=8)
     ax.grid(which='major', axis='both')
@@ -168,3 +169,114 @@ def plot_bus_voltages_rms(data, bus):
     fig.tight_layout()
     plt.show()
     return
+
+
+def plot_bus_voltage_dir(data, bus, limit=2):
+    """
+    Plot direct sequence bus voltage as a polar plot.
+
+    Parameters
+    ----------
+    data : DataFrame
+        Pandas DataFrame holding simulation signals.
+    bus : str
+        Name of the bus, e.g. 'BUS2'.
+    limit : float, default=2
+        Time limit of the voltage display in seconds.
+    
+    Returns
+    -------
+    Show matplotlib figure.
+    """
+    time = data['time'].values
+    dt = time[1] - time[0]
+    t_start = int(0.1/dt)
+    t_end = int(0.2/dt)
+    lim = int(limit/dt)+1
+    mag = data[bus+'/V1_mag'].values
+    ang = data[bus+'/V1_phase'].values
+    fig, ax = plt.subplots(figsize=(5.5, 5),
+                           subplot_kw=dict(projection='polar'))
+    ax.text(ang[t_start], mag[t_start], 't = 0.1 s', color='red', fontsize=10)
+    ax.text(ang[t_end], mag[t_end], 't = 0.2 s', color='red', fontsize=10)
+    sc = ax.scatter(ang[:lim], mag[:lim], c=time[:lim],
+                    cmap='viridis', marker='o', s=8)
+    cb = plt.colorbar(sc, shrink=0.8)
+    cb.set_label('Time (s)')
+    fig.tight_layout()
+    plt.show()
+    return
+
+
+def tsi_from_angle(data, tol=5):
+    """
+    Transient Stability Index for the simulation.
+    TSI is obtained from the machine swing angles,
+    with regards to the slack bus angle.
+
+    Parameters
+    ----------
+    data : DataFrame
+        Pandas DataFrame holding simulation signals.
+    tol : float, default=5
+        Tolerance for signal detection in degrees.
+
+    Returns
+    -------
+    tsi : int
+        TSI value: 0 - stable case, 1 - unstable case.
+    """
+    # Machine angle with regards to the slach bus.
+    for name in data.columns:
+        string = re.search('Teta', name)
+        if string is not None:
+            signal = data[name].values
+            pp = name.split('/')[0][-2:]
+            if pp == '02':
+                # Slack machine.
+                slack_signal = signal
+                break
+    tsi = 0
+    for name in data.columns:
+        string = re.search('Teta', name)
+        if string is not None:
+            signal = data[name].values
+            pp = name.split('/')[0][-2:]
+            if pp == '02':
+                continue
+            else:
+                delta_signal = slack_signal - signal
+                dd = abs(delta_signal[0] - delta_signal[-1])
+                if dd > tol:
+                    tsi = 1
+                    break
+    return tsi
+
+
+def tsi_from_omega(data, tol=1e-3):
+    """
+    Transient Stability Index for the simulation.
+    TSI is obtained from the machine omega values.
+
+    Parameters
+    ----------
+    data : DataFrame
+        Pandas DataFrame holding simulation signals.
+    tol : float, default=1e-3
+        Tolerance for signal detection in degrees.
+
+    Returns
+    -------
+    tsi : int
+        TSI value: 0 - stable case, 1 - unstable case.
+    """
+    tsi = 0
+    for name in data.columns:
+        string = re.search('Omega', name)
+        if string is not None:
+            signal = data[name].values
+            dd = abs(1 - signal[-1])
+            if dd > tol:
+                tsi = 1
+                break
+    return tsi

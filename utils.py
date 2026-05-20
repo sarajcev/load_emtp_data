@@ -19,7 +19,7 @@ def create_white_list(varnames, exclude, buses):
         List of bus indexes that have voltage
         measurements.
     
-    returns
+    Returns
     -------
     white_list : list
         List with variable names for the simulation.
@@ -43,8 +43,8 @@ def create_white_list(varnames, exclude, buses):
     # Machine signals.
     for name in varnames:
         white_list.extend(
-            ['PowerPlant_' + f'{i+1:02d}' + name 
-            for i in range(10) 
+            ['PowerPlant_' + f'{i:02d}' + name 
+            for i in range(1, 11) 
             if i not in exclude]
         )
     return white_list
@@ -93,7 +93,7 @@ def plot_machine_signals(data, category):
 
 def plot_machine_delta_signals(data):
     """
-    Plot EMTP-RV simulation signals for the machines.
+    Plot machine angles with regards to the slack bus.
 
     Parameters
     ----------
@@ -103,13 +103,12 @@ def plot_machine_delta_signals(data):
     Returns
     -------
     Show matplotlib figure with plots of machine angles
-    with regards to the slack machine.
+    with regards to the slack bus.
 
     Notes
     -----
     This function is tailored for the machine signals,
-    which contain 'PowerPlant' string in their name.
-    DataFrame is exported from the simulation class.
+    which contain 'Teta' string in their name.
     """
     time = data['time'].values
     fig, ax = plt.subplots(figsize=(6.5, 3.5))
@@ -135,6 +134,7 @@ def plot_machine_delta_signals(data):
     ax.legend(loc='upper right', frameon=True, fancybox=True, fontsize=8)
     ax.grid(which='major', axis='both')
     ax.set_xlabel('Time (s)')
+    ax.set_ylabel('Angle difference')
     fig.tight_layout()
     plt.show()
     return

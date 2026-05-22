@@ -26,20 +26,19 @@ def create_white_list(varnames, exclude, buses):
     """
     # Form a "white list" of variable names.
     white_list = []
+
     # Bus voltages.
     for bus in buses:
         # Phase a, b and c values.
         busa = 'BUS' + str(bus) + '/Vrms_a'
-        white_list.append(busa)
         busb = 'BUS' + str(bus) + '/Vrms_b'
-        white_list.append(busb)
         busc = 'BUS' + str(bus) + '/Vrms_c'
-        white_list.append(busc)
+        white_list.extend([busa, busb, busc])
         # Direct sequence magnitude and phase angle.
         mag = 'BUS' + str(bus) + '/V1_mag'
-        white_list.append(mag)
         phase = 'BUS' + str(bus) + '/V1_phase'
-        white_list.append(phase)
+        white_list.extend([mag, phase])
+
     # Machine signals.
     for name in varnames:
         white_list.extend(
@@ -47,6 +46,19 @@ def create_white_list(varnames, exclude, buses):
             for i in range(1, 11) # ten machines
             if i not in exclude]
         )
+
+    # Wind farm signals (DEV2).
+    white_list.extend(['DEV2/P', 'DEV2/Q'])
+    white_list.extend(['DEV2/V0', 'DEV2/V1', 'DEV2/V2'])
+    white_list.extend(['DEV2/I0', 'DEV2/I1', 'DEV2/I2'])
+    white_list.append('FFC_WP2/Wind_Turbine/PMSG_T_rotor')
+    white_list.append('FFC_WP2/Wind_Turbine/PMSG_w_rotor')
+
+    # Solar park signals (DEV3).
+    white_list.extend(['DEV3/P', 'DEV3/Q'])
+    white_list.extend(['DEV3/V0', 'DEV3/V1', 'DEV3/V2'])
+    white_list.extend(['DEV3/I0', 'DEV3/I1', 'DEV3/I2'])
+    
     return white_list
 
 

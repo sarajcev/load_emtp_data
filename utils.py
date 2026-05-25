@@ -53,11 +53,13 @@ def create_white_list(varnames, exclude, buses):
     white_list.extend(['DEV2/I0', 'DEV2/I1', 'DEV2/I2'])
     white_list.append('FFC_WP2/Wind_Turbine/PMSG_T_rotor')
     white_list.append('FFC_WP2/Wind_Turbine/PMSG_w_rotor')
+    white_list.append('FFC_WP2/Converter_control/Control/Grid_Ctrl/FRT_flag')
 
     # Solar park signals (DEV3).
     white_list.extend(['DEV3/P', 'DEV3/Q'])
     white_list.extend(['DEV3/V0', 'DEV3/V1', 'DEV3/V2'])
     white_list.extend(['DEV3/I0', 'DEV3/I1', 'DEV3/I2'])
+    white_list.append('WECC_PVPark_1/Converter_control/Control/GridControl_DLL/FRT_flag')
     
     return white_list
 

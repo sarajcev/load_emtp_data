@@ -155,7 +155,7 @@ def plot_machine_delta_signals(data):
     return
 
 
-def plot_bus_voltages_rms(data, bus):
+def plot_bus_voltages_rms(data, bus, xlim=None):
     """
     Plot three-phase bus voltage RMS values.
 
@@ -165,6 +165,9 @@ def plot_bus_voltages_rms(data, bus):
         Pandas DataFrame holding simulation signals.
     bus : str
         Name of the bus, e.g. 'BUS2'.
+    xlim : float or None, default=None
+        Time limit of the signal display. It is
+        ignored if None.
     
     Returns
     -------
@@ -180,12 +183,14 @@ def plot_bus_voltages_rms(data, bus):
     ax.grid(which='major', axis='both')
     ax.set_xlabel('Time (s)')
     ax.set_ylabel('RMS voltage (p.u.)')
+    if xlim is not None:
+        ax.set_xlim(right=xlim)
     fig.tight_layout()
     plt.show()
     return
 
 
-def plot_bus_voltage_dir(data, bus, limit=2):
+def plot_bus_voltage_dir(data, bus, limit=None, show_line=False):
     """
     Plot direct sequence bus voltage as a polar plot.
 
@@ -195,8 +200,10 @@ def plot_bus_voltage_dir(data, bus, limit=2):
         Pandas DataFrame holding simulation signals.
     bus : str
         Name of the bus, e.g. 'BUS2'.
-    limit : float, default=2
+    limit : float or None, default=None
         Time limit of the voltage display in seconds.
+    show_line : bool, default=False
+        Show the line connecting points of voltage measurements.
     
     Returns
     -------
@@ -206,15 +213,21 @@ def plot_bus_voltage_dir(data, bus, limit=2):
     dt = time[1] - time[0]
     t_start = int(0.1/dt)
     t_end = int(0.2/dt)
-    lim = int(limit/dt)+1
+    if limit is None:
+        lim = -1
+    else:
+        lim = int(limit/dt)+1
     mag = data[bus+'/V1_mag'].values
     ang = data[bus+'/V1_phase'].values
     fig, ax = plt.subplots(figsize=(5.5, 5),
                            subplot_kw=dict(projection='polar'))
     ax.text(ang[t_start], mag[t_start], 't = 0.1 s', color='red', fontsize=10)
     ax.text(ang[t_end], mag[t_end], 't = 0.2 s', color='red', fontsize=10)
+    ax.text(ang[lim], mag[lim], f't = {limit} s', color='red', fontsize=10)
+    if show_line:
+        ax.plot(ang[:lim], mag[:lim], c='steelblue', ls='-', lw=0.5, zorder=-1)
     sc = ax.scatter(ang[:lim], mag[:lim], c=time[:lim],
-                    cmap='viridis', marker='o', s=8)
+                    cmap='viridis', marker='o', s=8, zorder=1)
     cb = plt.colorbar(sc, shrink=0.8)
     cb.set_label('Time (s)')
     fig.tight_layout()

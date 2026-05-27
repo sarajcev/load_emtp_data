@@ -184,7 +184,7 @@ def plot_bus_voltages_rms(data, bus, xlim=None):
     ax.set_xlabel('Time (s)')
     ax.set_ylabel('RMS voltage (p.u.)')
     if xlim is not None:
-        ax.set_xlim(right=xlim)
+        ax.set_xlim(0, xlim)
     fig.tight_layout()
     plt.show()
     return

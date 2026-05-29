@@ -2,7 +2,7 @@ import re
 import matplotlib.pylab as plt
 
 
-def create_white_list(varnames, exclude, buses, ibrs):
+def create_white_list(varnames, exclude, buses, variant):
     """
     Create a `white_list` variable for extracting 
     EMTP simulations signals from the IEEE New England 
@@ -14,16 +14,20 @@ def create_white_list(varnames, exclude, buses, ibrs):
         List of machine variable names that will be in the 
         `white_list` variable.
     exclude : list
-        List of indexes for the machines that are excluded from 
-        the simulation (and replaced by the renewable sources).
+        List of indexes for the conventional generators that are 
+        excluded from the simulation (and possibly replaced by the 
+        renewable sources). This list can be empty.
     buses : list
         List of BUS indexes that have voltage measurements.
-    ibrs : bool
-        Indicator variable (True/False) that specifies if the 
-        renewable sources are connected to the power system. 
-        Classical IEEE New England 39-bus power system has no 
-        connected renewables.
-    
+    variant : str
+        Variable that specifies scenario variant. It can take
+        one of the following values:
+        'base' - classical IEEE New England 39-bus power system
+                 (with no renewables),
+        'var1' - adapted IEEE New England 39-bus power system with
+                 18% share of renewables (connected at locations
+                 of excluded generators).
+        
     Returns
     -------
     white_list : list
@@ -64,7 +68,7 @@ def create_white_list(varnames, exclude, buses, ibrs):
         )
     
     # Renewables connected to the power system?
-    if ibrs:
+    if variant in ['var1']:
         # Wind farm signals (DEV2).
         white_list.extend(['DEV2/P', 'DEV2/Q'])
         white_list.extend(['DEV2/V0', 'DEV2/V1', 'DEV2/V2'])

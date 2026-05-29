@@ -25,7 +25,7 @@ location. Analysis was carried out in the EMTP-RV, using Parametric
 Studio, with a 40 us time step and a 2 ms output resolution.
 
 Signals from conventional plants are prefixed by the 'PowerPlant'
-word. Node voltages (three phases) are prefixed by the bus name. 
+word. Bus voltages (three phases) are prefixed by the bus name. 
 
 PowerPlant signals variable names:
     '/Teta_1_SM1',   # rotor angle (deg)
@@ -38,7 +38,7 @@ PowerPlant signals variable names:
     '/vq_SM1',  # q-axis stator voltage (p.u.)
     '/iq_SM1',  # q-axis stator current (p.u.)
 
-Bus signals variable names:
+BUS signals variable names:
     '/Vrms_a'    # RMS voltage in phase a (p.u.)
     '/Vrms_b'    # RMS voltage in phase b (p.u.)
     '/Vrms_c'    # RMS voltage in phase c (p.u.)
@@ -89,9 +89,9 @@ location. Analysis was carried out in the EMTP-RV, using Parametric
 Studio, with a 40 us time step and a 2 ms output resolution.
 
 Signals from conventional plants are prefixed by the 'PowerPlant'
-word, those from the Wind Farm have a 'DEV2' prefix and those from
-the PV plant have a 'DEV3' prefix. Node voltages (three phases) are
-prefixed by the bus name. Fault Ride Through (FRT) signals for the
+word, those from the Wind Farm have a 'WF' prefix and those from
+the PV plant have a 'PV' prefix. Bus voltages (three phases) are
+prefixed by the BUS name. Fault Ride Through (FRT) signals for the
 Wind farm and PV plant were recorded as well, where violations of
 FRT criteria are identified by changing the indicator from 0 to 1.
 
@@ -106,25 +106,25 @@ PowerPlant signals variable names:
     '/vq_SM1',  # q-axis stator voltage (p.u.)
     '/iq_SM1',  # q-axis stator current (p.u.)
 
-WindFarm signals variable names:
-    'DEV2/P'   # active power (W)
-    'DEV2/Q'   # reactive power (VAR)
-    'DEV2/V0', 'DEV2I0'  # zero sequence voltage & current (V, A)
-    'DEV2/V1', 'DEV2I1'  # direct sequence voltage & current (V, A)
-    'DEV2/V2', 'DEV2I2'  # inverse sequence voltage & current (V, A)
-    'WindFarm/PMSG_T_rotor'  # aggregated wind turbines torque
-    'WindFarm/PMSG_w_rotor'  # aggregated wind turbines speed
-    'WindFarm/FRT_flag'      # wind farm FRT indicator
+WindFarm (WF) signals variable names:
+    'WF/P'   # active power (W)
+    'WF/Q'   # reactive power (VAR)
+    'WF/V0', 'WF/I0'  # zero sequence voltage & current (V, A)
+    'WF/V1', 'WF/I1'  # direct sequence voltage & current (V, A)
+    'WF/V2', 'WF/I2'  # inverse sequence voltage & current (V, A)
+    'WF/PMSG_T_rotor'  # aggregated wind turbines torque
+    'WF/PMSG_w_rotor'  # aggregated wind turbines speed
+    'WF/FRT_flag'      # wind farm FRT indicator
 
-PVPlant signals variable names:
-    'DEV3/P'   # active power (W)
-    'DEV3/Q'   # reactive power (VAR)
-    'DEV3/V0', 'DEV3I0'  # zero sequence voltage & current (V, A)
-    'DEV3/V1', 'DEV3I1'  # direct sequence voltage & current (V, A)
-    'DEV3/V2', 'DEV3I2'  # inverse sequence voltage & current (V, A)
-    'PVPlant/FRT_flag'   # PV plant FRT indicator
+PV Plant (PV) signals variable names:
+    'PV/P'   # active power (W)
+    'PV/Q'   # reactive power (VAR)
+    'PV/V0', 'PV/I0'  # zero sequence voltage & current (V, A)
+    'PV/V1', 'PV/I1'  # direct sequence voltage & current (V, A)
+    'PV/V2', 'PV/I2'  # inverse sequence voltage & current (V, A)
+    'PV/FRT_flag'     # PV plant FRT indicator
 
-Bus signals variable names:
+BUS signals variable names:
     '/Vrms_a'    # RMS voltage in phase a (p.u.)
     '/Vrms_b'    # RMS voltage in phase b (p.u.)
     '/Vrms_c'    # RMS voltage in phase c (p.u.)

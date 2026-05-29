@@ -1,3 +1,60 @@
+read_me_v0 = \
+"""
+IEEE New England 39-bus power system with no renewables.
+
+This dictionary holds transient analysis results from applying
+three different short-circuit types on main buses and half-points
+of all transmission lines in the original IEEE New England 39-bus
+power system.
+
+Three short-circuits (SC) types are: three-phase (SC3), two-phase,
+i.e. phase-to-phase fault between phases 'b' and 'c' (SC2), and a 
+single-phase to ground fault in phase 'a' (SC1). Arc resistance
+was neglected.
+
+Dictionary keys have a form: 'SCX-BUSY', where X is a number that
+identifies the type of short-circuit (3, 2, 1) and Y is an index
+of the bus where the short-circuit has been applied. Short circuit
+starts at 0.1 s and has a duration as stated in the file name.
+Initial condition of the power system was obtained from the load
+flow analysis.
+
+To each key is assigned a Pandas DataFrame which holds time-domain
+signals from the transient analysis of that particular SC type and
+location. Analysis was carried out in the EMTP-RV, using Parametric
+Studio, with a 40 us time step and a 2 ms output resolution.
+
+Signals from conventional plants are prefixed by the 'PowerPlant'
+word. Node voltages (three phases) are prefixed by the bus name. 
+
+PowerPlant signals variable names:
+    '/Teta_1_SM1',   # rotor angle (deg)
+    '/Omega_1_SM1',  # rotor speed
+    '/PowerAng_SM1', # power angle
+    '/Pe_SM1',       # electrical power (p.u)
+    '/vd_SM1',  # d-axis stator voltage (p.u.)
+    '/id_SM1',  # d-axis stator current (p.u.)
+    '/Ef_SM1',  # EMF voltage (q-axis), (p.u.)
+    '/vq_SM1',  # q-axis stator voltage (p.u.)
+    '/iq_SM1',  # q-axis stator current (p.u.)
+
+Bus signals variable names:
+    '/Vrms_a'    # RMS voltage in phase a (p.u.)
+    '/Vrms_b'    # RMS voltage in phase b (p.u.)
+    '/Vrms_c'    # RMS voltage in phase c (p.u.)
+    '/V1_mag'    # direct seq. voltage magnitude (p.u.)
+    '/V1_phase'  # direct seq. voltage phase angle (deg)
+
+Authors:
+    Ivica Juric-Grgic, Ivan Krolo, Dino Lovric, Petar Sarajcev
+    University of Split, FESB, Department of Power Engineering,
+    R. Boskovica 32, HR-21000 Split, Croatia.
+    Corresponding author: petar.sarajcev@fesb.hr
+
+License: CC-BY
+"""
+
+
 read_me = \
 """
 IEEE New England 39-bus power system with 18% share of renewables.
@@ -22,8 +79,9 @@ was neglected.
 Dictionary keys have a form: 'SCX-BUSY', where X is a number that
 identifies the type of short-circuit (3, 2, 1) and Y is an index
 of the bus where the short-circuit has been applied. Short circuit
-starts at 0.1 s and has a duration of 100 ms. Initial condition of
-the power system was obtained from the load-flow analysis.
+starts at 0.1 s and has a duration as indicated in the file name.
+Initial condition of the power system was obtained from the load
+flow analysis.
 
 To each key is assigned a Pandas DataFrame which holds time-domain
 signals from the transient analysis of that particular SC type and
@@ -32,7 +90,7 @@ Studio, with a 40 us time step and a 2 ms output resolution.
 
 Signals from conventional plants are prefixed by the 'PowerPlant'
 word, those from the Wind Farm have a 'DEV2' prefix and those from
-the PV plant have a 'DEV3' prefix. Bus voltages (three phases) are
+the PV plant have a 'DEV3' prefix. Node voltages (three phases) are
 prefixed by the bus name. Fault Ride Through (FRT) signals for the
 Wind farm and PV plant were recorded as well, where violations of
 FRT criteria are identified by changing the indicator from 0 to 1.

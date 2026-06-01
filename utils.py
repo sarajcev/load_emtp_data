@@ -85,7 +85,7 @@ def create_white_list(varnames, exclude, buses, variant):
     return white_list
 
 
-def plot_machine_signals(data, category):
+def plot_machine_signals(data, category, title=False):
     """
     Plot EMTP-RV simulation signals for the machines.
 
@@ -98,6 +98,8 @@ def plot_machine_signals(data, category):
         list" that will be plotted. Category can be, for
         example, 'Teta', 'Omega', etc., which defines a
         particular group of signals in the white list.
+    title : bool, default=False
+        Figure title from key.
     
     Returns
     -------
@@ -112,6 +114,8 @@ def plot_machine_signals(data, category):
     """
     time = data['time'].values
     fig, ax = plt.subplots(figsize=(6.5, 3.5))
+    if title:
+        ax.set_title(title, fontsize=9)
     for name in data.columns:
         string = re.search(category, name)
         if string is not None:
@@ -126,7 +130,7 @@ def plot_machine_signals(data, category):
     return
 
 
-def plot_machine_delta_signals(data):
+def plot_machine_delta_signals(data, title=False):
     """
     Plot machine angles with regards to the slack bus.
 
@@ -134,6 +138,8 @@ def plot_machine_delta_signals(data):
     ----------
     data : DataFrame
         Pandas DataFrame holding simulation signals.
+    title : bool, default=False
+        Figure title from key.
     
     Returns
     -------
@@ -147,6 +153,8 @@ def plot_machine_delta_signals(data):
     """
     time = data['time'].values
     fig, ax = plt.subplots(figsize=(6.5, 3.5))
+    if title:
+        ax.set_title(title, fontsize=9)
     for name in data.columns:
         string = re.search('Teta', name)
         if string is not None:

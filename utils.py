@@ -22,11 +22,11 @@ def create_white_list(varnames, exclude, buses, variant):
     variant : str
         Variable that specifies scenario variant. It can take
         one of the following values:
-        'base' - classical IEEE New England 39-bus power system
-                 (with no renewables),
-        'var1' - adapted IEEE New England 39-bus power system with
-                 18% share of renewables (connected at locations
-                 of excluded generators).
+        'V0' - classical IEEE New England 39-bus power system
+               (with no renewables),
+        'V1' - adapted IEEE New England 39-bus power system with
+               18% share of renewables (connected at locations
+               of excluded generators).
         
     Returns
     -------
@@ -68,7 +68,7 @@ def create_white_list(varnames, exclude, buses, variant):
         )
     
     # Renewables connected to the power system?
-    if variant in ['var1']:
+    if variant in ['V1', 'V2', 'V3']:
         # Wind farm signals (DEV2).
         white_list.extend(['DEV2/P', 'DEV2/Q'])
         white_list.extend(['DEV2/V0', 'DEV2/V1', 'DEV2/V2'])

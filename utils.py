@@ -45,19 +45,8 @@ def create_white_list(varnames, exclude, buses, variant):
         # Direct sequence magnitude and phase angle.
         mag = 'BUS' + str(bus) + '/V1_mag'
         phase = 'BUS' + str(bus) + '/V1_phase'
-        if bus == 31:
-            # BUS31 is a special case!
-            # It is an internal node associated with generator G2.
-            white_list.extend([
-                'PowerPlant_02/'+busa,
-                'PowerPlant_02/'+busb,
-                'PowerPlant_02/'+busc,
-                'PowerPlant_02/'+mag,
-                'PowerPlant_02/'+phase,
-            ])
-        else:
-            white_list.extend([busa, busb, busc])
-            white_list.extend([mag, phase])
+        white_list.extend([busa, busb, busc])
+        white_list.extend([mag, phase])
 
     # Machine signals.
     for name in varnames:

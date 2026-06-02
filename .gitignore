@@ -1,4 +1,5 @@
 .idea/
+.idea/inspectionProfiles/
 __init__.py
 __pycache__/
 *.m

@@ -25,7 +25,7 @@ def create_white_list(varnames, exclude, buses, variant):
         'V0' - classical IEEE New England 39-bus power system
                (with no renewables),
         'V1' - adapted IEEE New England 39-bus power system with
-               18% share of renewables (connected at locations
+               20% share of renewables (connected at locations
                of excluded generators).
         
     Returns
@@ -141,6 +141,9 @@ def plot_machine_delta_signals(data, title=False):
     which contain 'Teta' string in their name.
     """
     time = data['time'].values
+    # Slack bus is represented by the machine G2.
+    slack_signal = data['PowerPlant_02/Teta_1_SM1'].values
+
     fig, ax = plt.subplots(figsize=(6.5, 3.5))
     if title:
         ax.set_title(title, fontsize=9)
@@ -150,17 +153,10 @@ def plot_machine_delta_signals(data, title=False):
             signal = data[name].values
             pp = name.split('/')[0][-2:]
             if pp == '02':
-                # Slack machine.
-                slack_signal = signal
-                break
-    for name in data.columns:
-        string = re.search('Teta', name)
-        if string is not None:
-            signal = data[name].values
-            pp = name.split('/')[0][-2:]
-            if pp == '02':
+                # This is the slack bus, skip it.
                 continue
             else:
+                # Difference in the swing from the slack machine.
                 delta_signal = slack_signal - signal
                 ax.plot(time, delta_signal, ls='-', lw=1.5,
                         label=name.split('/')[0])
@@ -255,9 +251,9 @@ def plot_bus_voltage_dir(data, bus, limit=None, show_line=False):
 
 def tsi_from_angle(data, tol=5):
     """
-    Transient Stability Index for the simulation.
+    Transient Stability Index (TSI) for the simulation.
     TSI is obtained from the machine swing angles,
-    with regards to the slack bus angle.
+    in regard to the slack bus angle (i.e. machine G2).
 
     Parameters
     ----------
@@ -271,16 +267,9 @@ def tsi_from_angle(data, tol=5):
     tsi : int
         TSI value: 0 - stable case, 1 - unstable case.
     """
-    # Machine angle with regards to the slach bus.
-    for name in data.columns:
-        string = re.search('Teta', name)
-        if string is not None:
-            signal = data[name].values
-            pp = name.split('/')[0][-2:]
-            if pp == '02':
-                # Slack machine.
-                slack_signal = signal
-                break
+    # Machine's swing angle in regard to the slack bus,
+    # which is represented by the machine G2.
+    slack_signal = data['PowerPlant_02/Teta_1_SM1'].values
     tsi = 0
     for name in data.columns:
         string = re.search('Teta', name)
@@ -288,40 +277,17 @@ def tsi_from_angle(data, tol=5):
             signal = data[name].values
             pp = name.split('/')[0][-2:]
             if pp == '02':
+                # This is the slack bus, skip it.
                 continue
             else:
+                # Difference in the swing from the slack machine.
                 delta_signal = slack_signal - signal
+                # Absolute difference between the first and last point
+                # of the swing difference from the slack machine.
                 dd = abs(delta_signal[0] - delta_signal[-1])
                 if dd > tol:
+                    # If this difference is larger than the prescribed
+                    # tolerance, then the swing is unstable.
                     tsi = 1
                     break
-    return tsi
-
-
-def tsi_from_omega(data, tol=1e-3):
-    """
-    Transient Stability Index for the simulation.
-    TSI is obtained from the machine omega values.
-
-    Parameters
-    ----------
-    data : DataFrame
-        Pandas DataFrame holding simulation signals.
-    tol : float, default=1e-3
-        Tolerance for signal detection in degrees.
-
-    Returns
-    -------
-    tsi : int
-        TSI value: 0 - stable case, 1 - unstable case.
-    """
-    tsi = 0
-    for name in data.columns:
-        string = re.search('Omega', name)
-        if string is not None:
-            signal = data[name].values
-            dd = abs(1 - signal[-1])
-            if dd > tol:
-                tsi = 1
-                break
     return tsi

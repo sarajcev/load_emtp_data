@@ -15,9 +15,9 @@ with 18% share of renewables. Total power production in this
 system equals 6192 MW, of which 5075.8 MW is from conventional 
 power plants and 1116.13 MW is from the renewables, where 
 742.43 MW is produced by the Wind farm and 373.7 MW by the
-PV plant. Conventional power plants no. 8 and 10 were excluded
-and replaced by the Wind farm and the PV plant. Aggregated Wind
-and PV models were used for these plants.
+PV plant. Conventional power plants G5 and G8 were excluded
+and replaced by the PV plant and the Wind farm, respectively. 
+Aggregated Wind and PV models were used.
 
 Three short-circuits (SC) types are: three-phase (SC3), two-phase,
 i.e. phase-to-phase fault between phases 'b' and 'c' (SC2), and a 
@@ -27,9 +27,9 @@ was neglected.
 Dictionary keys have a form: 'SCX-BUSY', where X is a number that
 identifies the type of short-circuit (3, 2, 1) and Y is an index
 of the bus where the short-circuit has been applied. Short circuit
-starts at 0.1 s and has a duration as indicated in the file name.
-Initial condition of the power system was obtained from the load
-flow analysis.
+starts at 0.1 s and has a duration as indicated in the file name
+(i.e. 100 ms or 300 ms). Initial condition of the power system was 
+obtained from the load flow analysis.
 
 To each key is assigned a Pandas DataFrame which holds time-domain
 signals from the transient analysis of that particular SC type and
@@ -66,7 +66,7 @@ WindFarm (WF) signals variable names:
     'WF/PMSG_w_rotor'  # aggregated wind turbines speed
     'WF/FRT_flag'      # wind farm FRT indicator
 
-PV Plant (PV) signals variable names:
+PVPlant (PV) signals variable names:
     'PV/P'   # active power (W)
     'PV/Q'   # reactive power (VAR)
     'PV/V0', 'PV/I0'  # zero sequence voltage & current (V, A)

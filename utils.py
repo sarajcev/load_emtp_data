@@ -291,20 +291,28 @@ def tsi_from_angle(data, tol=5):
     return tsi
 
 
-def plot_multi_figure(data, plant, bus, save=False):
+def plot_machine_multi_figure(data, key, plant, bus, save=False):
     """
     Plot machine signals with multiple subplots.
 
     Parameters
     ----------
-    data : pd.DataFrame
-        Pandas DataFrame holding simulation signals.
+    data : dictionary
+        Dictionary holding simulation data.
+    key : str
+        String identifying dictionary key with information
+        on type and location of the short-circuit. Then,
+        data[key] is a pandas DataFrame with simulation signals
+        for that particular case, e.g. data['SC3-BUS2'] holds
+        data for the three-phase short circuit at bus number 2.
     plant : str
         String identifying machine for which signals will
         be plotted, e.g. 'PowerPlant_07'.
     bus : str
-        String identifying main bus for which signals will
-        be plotted, e.g. 'BUS2'.
+        String identifying main bus for which voltages will
+        be plotted, e.g. 'BUS2'. This should be the HV bus
+        of the step-up transformer through which the machine
+        from the `plant` variable is connected to the grid.
     save : bool, default=False
         Indicator for saving the figure to external file.
 
@@ -312,6 +320,8 @@ def plot_multi_figure(data, plant, bus, save=False):
     -------
     Shows a matplotlib figure.
     """
+    data = data[key].copy()
+    tsi = 0
     fig = plt.figure(figsize=(7, 6.5), layout='constrained')
     gs = GridSpec(3, 3, figure=fig)
     # Top row subplot.
@@ -327,9 +337,12 @@ def plot_multi_figure(data, plant, bus, save=False):
     ax_mid = fig.add_subplot(gs[1:, 0:-1])
     for name in data.columns:
         if 'Teta' in name:
+            if data[name].values[-1] > 500:
+                tsi = 1
             pp = name.split('/')[0]
             if pp == plant:
-                ax_mid.plot(data['time'], data[name], c='steelblue', lw=2.5)
+                ax_mid.plot(data['time'], data[name],
+                            c='steelblue', lw=2.5, label=plant)
             else:
                 ax_mid.plot(data['time'], data[name], c='grey', ls='-', lw=1)
     ax_mid.set_xlabel('Time (s)')
@@ -348,7 +361,75 @@ def plot_multi_figure(data, plant, bus, save=False):
     ax_le2.set_xlabel('id (pu)')
     ax_le2.set_ylabel('iq (pu)')
     ax_le2.grid()
+    if tsi:
+        ax_mid.set_ylim(bottom=0, top=500)
     if save:
-        plt.savefig(plant + '.png', dpi=600)
+        plt.savefig(key + ':' + plant + '.png', dpi=600)
+    plt.show()
+    return
+
+
+def plot_ren_multi_figure(data, key, plant, save=False):
+    """
+    Plot renewables (Wind or PV) signals with multiple subplots.
+
+    Parameters
+    ----------
+    data : dictionary
+        Dictionary holding simulation data.
+    key : str
+        String identifying dictionary key with information
+        on type and location of the short-circuit. Then,
+        data[key] is a pandas DataFrame with simulation signals
+        for that particular case, e.g. data['SC3-BUS2'] holds
+        data for the three-phase short circuit at bus number 2.
+    plant : str
+        String that identifies if the 'WF' or 'PV' signals will
+        be plotted.
+    save : bool, default=False
+        Indicator for saving the figure to external file.
+
+    Returns
+    -------
+    Shows a matplotlib figure.
+    """
+    data = data[key].copy()
+    fig = plt.figure(figsize=(7, 6.5), layout='constrained')
+    gs = GridSpec(3, 3, figure=fig)
+    # Top row subplot.
+    ax_top = fig.add_subplot(gs[0, :])
+    ax_top.plot(data['time'], data[plant + '/P']/1e6, label='active (P)')
+    ax_top.plot(data['time'], data[plant + '/Q']/1e6, label='reactive (Q)')
+    ax_top.legend(loc='best', frameon=True, fancybox=True)
+    ax_top.set_xlabel('Time (s)')
+    ax_top.set_ylabel('Power (MW)')
+    ax_top.grid()
+    # Middle row subplots.
+    ax0 = fig.add_subplot(gs[1, 0])
+    ax0.plot(data['time'], data[plant + '/V1']/1e3, label='V1')
+    ax0.legend(loc='best', frameon=True, fancybox=True)
+    ax0.set_xlabel('Time (s)')
+    ax0.set_ylabel('Voltage (kV)')
+    ax0.grid()
+    ax1 = fig.add_subplot(gs[1, 1])
+    ax1.plot(data['time'], data[plant + '/V2']/1e3, c='darkorange', label='V2')
+    ax1.legend(loc='best', frameon=True, fancybox=True)
+    ax1.set_xlabel('Time (s)')
+    #ax1.set_ylabel('Voltage (pu)')
+    ax1.grid()
+    ax2 = fig.add_subplot(gs[1, 2])
+    ax2.plot(data['time'], data[plant + '/V0']/1e3, c='seagreen', label='V0')
+    ax2.legend(loc='best', frameon=True, fancybox=True)
+    ax2.set_xlabel('Time (s)')
+    #ax2.set_ylabel('Voltage (pu)')
+    ax2.grid()
+    # Bottom row subplot.
+    ax_bot = fig.add_subplot(gs[2, :])
+    ax_bot.plot(data['time'], data[plant + '/FRT_flag'])
+    ax_bot.set_xlabel('Time (s)')
+    ax_bot.set_ylabel('FRT flag')
+    ax_bot.grid()
+    if save:
+        plt.savefig(key + ':' + plant + '.png', dpi=600)
     plt.show()
     return

@@ -291,7 +291,7 @@ def tsi_from_angle(data, tol=5):
     return tsi
 
 
-def plot_multi_figure(data, plant, bus):
+def plot_multi_figure(data, plant, bus, save=False):
     """
     Plot machine signals with multiple subplots.
 
@@ -305,6 +305,8 @@ def plot_multi_figure(data, plant, bus):
     bus : str
         String identifying main bus for which signals will
         be plotted, e.g. 'BUS2'.
+    save : bool, default=False
+        Indicator for saving the figure to external file.
 
     Returns
     -------
@@ -346,5 +348,7 @@ def plot_multi_figure(data, plant, bus):
     ax_le2.set_xlabel('id (pu)')
     ax_le2.set_ylabel('iq (pu)')
     ax_le2.grid()
+    if save:
+        plt.savefig(plant + '.png', dpi=600)
     plt.show()
     return

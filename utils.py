@@ -327,24 +327,22 @@ def plot_multi_figure(data, plant, bus):
         if 'Teta' in name:
             pp = name.split('/')[0]
             if pp == plant:
-                ax_mid.plot(data['time'], data[plant + '/Teta_1_SM1'],
-                            c='steelblue', lw=2.5)
+                ax_mid.plot(data['time'], data[name], c='steelblue', lw=2.5)
             else:
-                ax_mid.plot(data['time'], data[name],
-                            c='grey', ls='-', lw=1)
+                ax_mid.plot(data['time'], data[name], c='grey', ls='-', lw=1)
     ax_mid.set_xlabel('Time (s)')
     ax_mid.set_ylabel('Rotor angle (deg)')
     ax_mid.grid()
     # Right side upper subplot.
     ax_le1 = fig.add_subplot(gs[1, 2])
-    ax_le1.plot(data[plant + '/vd_SM1'], data[plant + '/vq_SM1'])
+    ax_le1.plot(data[plant + '/vd_SM1'], data[plant + '/vq_SM1'], lw=1)
     ax_le1.set_xlabel('vd (pu)')
     ax_le1.set_ylabel('vq (pu)')
     ax_le1.grid()
     # Right side lower subplot.
     ax_le2 = fig.add_subplot(gs[2, 2])
     ax_le2.plot(data[plant + '/id_SM1'], data[plant + '/iq_SM1'],
-                c='steelblue')
+                c='steelblue', lw=1)
     ax_le2.set_xlabel('id (pu)')
     ax_le2.set_ylabel('iq (pu)')
     ax_le2.grid()

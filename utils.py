@@ -1,4 +1,3 @@
-import re
 import matplotlib.pylab as plt
 
 
@@ -106,8 +105,7 @@ def plot_machine_signals(data, category, title=False):
     if title:
         ax.set_title(title, fontsize=9)
     for name in data.columns:
-        string = re.search(category, name)
-        if string is not None:
+        if category in name:
             signal = data[name].values
             ax.plot(time, signal, ls='-', lw=1.5, label=name.split('/')[0])
     ax.legend(loc='upper right', frameon=True, fancybox=True, fontsize=8)
@@ -148,8 +146,7 @@ def plot_machine_delta_signals(data, title=False):
     if title:
         ax.set_title(title, fontsize=9)
     for name in data.columns:
-        string = re.search('Teta', name)
-        if string is not None:
+        if 'Teta' in name:
             signal = data[name].values
             pp = name.split('/')[0][-2:]
             if pp == '02':
@@ -167,6 +164,7 @@ def plot_machine_delta_signals(data, title=False):
     fig.tight_layout()
     plt.show()
     return
+
 
 
 def plot_bus_voltages_rms(data, bus, xlim=None):
@@ -272,8 +270,7 @@ def tsi_from_angle(data, tol=5):
     slack_signal = data['PowerPlant_02/Teta_1_SM1'].values
     tsi = 0
     for name in data.columns:
-        string = re.search('Teta', name)
-        if string is not None:
+        if 'Teta' in name:
             signal = data[name].values
             pp = name.split('/')[0][-2:]
             if pp == '02':

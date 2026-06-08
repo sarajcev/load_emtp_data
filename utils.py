@@ -1,4 +1,5 @@
 import matplotlib.pylab as plt
+from matplotlib.gridspec import GridSpec
 
 
 def create_white_list(varnames, exclude, buses, variant):
@@ -288,3 +289,64 @@ def tsi_from_angle(data, tol=5):
                     tsi = 1
                     break
     return tsi
+
+
+def plot_multi_figure(data, plant, bus):
+    """
+    Plot machine signals with multiple subplots.
+
+    Parameters
+    ----------
+    data : pd.DataFrame
+        Pandas DataFrame holding simulation signals.
+    plant : str
+        String identifying machine for which signals will
+        be plotted, e.g. 'PowerPlant_07'.
+    bus : str
+        String identifying main bus for which signals will
+        be plotted, e.g. 'BUS2'.
+
+    Returns
+    -------
+    Shows a matplotlib figure.
+    """
+    fig = plt.figure(figsize=(7, 6.5), layout='constrained')
+    gs = GridSpec(3, 3, figure=fig)
+    # Top row subplot.
+    ax_top = fig.add_subplot(gs[0, :])
+    ax_top.plot(data['time'], data[bus + '/Vrms_a'], label='phase a', c='grey')
+    ax_top.plot(data['time'], data[bus + '/Vrms_b'], label='phase b', c='grey', ls='--')
+    ax_top.plot(data['time'], data[bus + '/Vrms_c'], label='phase c')
+    ax_top.legend(loc='lower right', frameon=True, fancybox=True)
+    ax_top.set_xlabel('Time (s)')
+    ax_top.set_ylabel('Voltage (pu)')
+    ax_top.grid()
+    # Main area subplot.
+    ax_mid = fig.add_subplot(gs[1:, 0:-1])
+    for name in data.columns:
+        if 'Teta' in name:
+            pp = name.split('/')[0]
+            if pp == plant:
+                ax_mid.plot(data['time'], data[plant + '/Teta_1_SM1'],
+                            c='steelblue', lw=2.5)
+            else:
+                ax_mid.plot(data['time'], data[name],
+                            c='grey', ls='-', lw=1)
+    ax_mid.set_xlabel('Time (s)')
+    ax_mid.set_ylabel('Rotor angle (deg)')
+    ax_mid.grid()
+    # Right side upper subplot.
+    ax_le1 = fig.add_subplot(gs[1, 2])
+    ax_le1.plot(data[plant + '/vd_SM1'], data[plant + '/vq_SM1'])
+    ax_le1.set_xlabel('vd (pu)')
+    ax_le1.set_ylabel('vq (pu)')
+    ax_le1.grid()
+    # Right side lower subplot.
+    ax_le2 = fig.add_subplot(gs[2, 2])
+    ax_le2.plot(data[plant + '/id_SM1'], data[plant + '/iq_SM1'],
+                c='steelblue')
+    ax_le2.set_xlabel('id (pu)')
+    ax_le2.set_ylabel('iq (pu)')
+    ax_le2.grid()
+    plt.show()
+    return

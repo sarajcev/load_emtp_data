@@ -253,10 +253,10 @@ def plot_bus_voltage(data, key, bus, t_sc=0.1, limit=None,
     ax_top = ax[0]
     ax[1].remove()
     # Top row subplot.
-    #ax_top = fig.add_subplot(gs[0, :])
     ax_top.plot(data['time'], data[bus + '/Vrms_a'], label='phase a', c='darkorange')
     ax_top.plot(data['time'], data[bus + '/Vrms_b'], label='phase b', c='grey')
     ax_top.plot(data['time'], data[bus + '/Vrms_c'], label='phase c')
+    ax_top.axvspan(0, limit, color='wheat', alpha=0.3)
     ax_top.legend(loc='lower right', frameon=True, fancybox=True)
     ax_top.set_xlabel('Time (s)')
     ax_top.set_ylabel('Voltage (pu)')
@@ -356,14 +356,11 @@ def plot_machine_multi_figure(data, key, plant, save=False):
     gs = GridSpec(3, 3, figure=fig)
     # Top row subplot.
     ax_top = fig.add_subplot(gs[0, :])
-    for name in data.columns:
-        if 'Pe' in name:
-            pp = name.split('/')[0]
-            if pp == plant:
-                ax_top.plot(data['time'], data[name],
-                            c='royalblue', label=plant)
+    ax_top.plot(data['time'], data[plant + '/Pe_SM1'],
+                c='royalblue', label='/Pe_SM1')
+    ax_top.legend(loc='best', frameon=True, fancybox=True)
     ax_top.set_xlabel('Time (s)')
-    ax_top.set_ylabel('Active power (pu)')
+    ax_top.set_ylabel('Power (pu)')
     ax_top.grid()
     # Main area subplot.
     ax_mid = fig.add_subplot(gs[1:, 0:-1])
@@ -425,7 +422,7 @@ def plot_ren_multi_figure(data, key, plant, save=False):
     -------
     Shows a matplotlib figure.
     """
-    data = data[key]
+    #data = data[key]
     fig = plt.figure(figsize=(7, 6.5), layout='constrained')
     gs = GridSpec(3, 3, figure=fig)
     # Top row subplot.

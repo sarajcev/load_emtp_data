@@ -422,7 +422,7 @@ def plot_ren_multi_figure(data, key, plant, save=False):
     -------
     Shows a matplotlib figure.
     """
-    #data = data[key]
+    data = data[key]
     fig = plt.figure(figsize=(7, 6.5), layout='constrained')
     gs = GridSpec(3, 3, figure=fig)
     # Top row subplot.

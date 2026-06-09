@@ -120,7 +120,7 @@ def plot_machine_signals(data, category, title=False):
 
 def plot_machine_delta_signals(data, title=False):
     """
-    Plot machine angles with regards to the slack bus.
+    Plot machine angles in regard to the slack bus.
 
     Parameters
     ----------
@@ -167,7 +167,6 @@ def plot_machine_delta_signals(data, title=False):
     return
 
 
-
 def plot_bus_voltages_rms(data, bus, xlim=None):
     """
     Plot three-phase bus voltage RMS values.
@@ -203,47 +202,82 @@ def plot_bus_voltages_rms(data, bus, xlim=None):
     return
 
 
-def plot_bus_voltage_dir(data, bus, limit=None, show_line=False):
+def plot_bus_voltage(data, key, bus, t_sc=0.1, limit=None,
+                         show_line=True, save=False):
     """
-    Plot direct sequence bus voltage as a polar plot.
+    Plot BUS voltages.
+
+    Plot three-phase bus voltage RMS values, along with a direct
+    sequence bus voltage as a polar plot.
 
     Parameters
     ----------
     data : DataFrame
         Pandas DataFrame holding simulation signals.
+    key : str
+        String identifying dictionary key with information
+        on type and location of the short-circuit. Then,
+        data[key] is a pandas DataFrame with simulation signals
+        for that particular case, e.g. data['SC3-BUS2'] holds
+        data for the three-phase short circuit at bus number 2.
     bus : str
         Name of the bus, e.g. 'BUS2'.
+    t_sc : float, default=0.1
+        Duration of the short-circuit (s).
     limit : float or None, default=None
         Time limit of the voltage display in seconds.
-    show_line : bool, default=False
-        Show the line connecting points of voltage measurements.
-    
+    show_line : bool, default=True
+        Show the line connecting individual points of
+        voltage measurements.
+    save : bool, default=False
+        Indicator for saving the figure to external file.
+
     Returns
     -------
     Show matplotlib figure.
     """
+    data = data[key]
     time = data['time'].values
     dt = time[1] - time[0]
     t_start = int(0.1/dt)
-    t_end = int(0.2/dt)
+    t_end = int((0.1 + t_sc)/dt)
     if limit is None:
         lim = -1
     else:
-        lim = int(limit/dt)+1
+        lim = int(limit/dt) + 1
     mag = data[bus+'/V1_mag'].values
     ang = data[bus+'/V1_phase'].values
-    fig, ax = plt.subplots(figsize=(5.5, 5),
-                           subplot_kw=dict(projection='polar'))
-    ax.text(ang[t_start], mag[t_start], 't = 0.1 s', color='red', fontsize=10)
-    ax.text(ang[t_end], mag[t_end], 't = 0.2 s', color='red', fontsize=10)
-    ax.text(ang[lim], mag[lim], f't = {limit} s', color='red', fontsize=10)
+
+    fig, ax = plt.subplots(2, 1, figsize=(5.5, 6.5),
+                           height_ratios=[1, 3])
+    ax_top = ax[0]
+    ax[1].remove()
+    # Top row subplot.
+    #ax_top = fig.add_subplot(gs[0, :])
+    ax_top.plot(data['time'], data[bus + '/Vrms_a'], label='phase a', c='darkorange')
+    ax_top.plot(data['time'], data[bus + '/Vrms_b'], label='phase b', c='grey')
+    ax_top.plot(data['time'], data[bus + '/Vrms_c'], label='phase c')
+    ax_top.legend(loc='lower right', frameon=True, fancybox=True)
+    ax_top.set_xlabel('Time (s)')
+    ax_top.set_ylabel('Voltage (pu)')
+    ax_top.grid()
+    # Main area subplot.
+    ax = fig.add_subplot(2, 1, 2, projection='polar')
+    ax.text(ang[t_start], mag[t_start], 't = 0.1 s', color='red', fontsize=9)
+    ax.text(ang[t_end], mag[t_end], f't = {0.1+t_sc} s', color='red', fontsize=9)
     if show_line:
-        ax.plot(ang[:lim], mag[:lim], c='steelblue', ls='-', lw=0.5, zorder=-1)
+        ax.plot(ang[:t_start], mag[:t_start], c='dimgrey',
+                ls='--', lw=1, zorder=-1)
+        ax.plot(ang[t_start:t_end], mag[t_start:t_end], c='red',
+                ls='--', lw=1, zorder=-1)
+        ax.plot(ang[t_end:lim], mag[t_end:lim], c='dimgrey',
+                ls='--', lw=1, zorder=-1)
     sc = ax.scatter(ang[:lim], mag[:lim], c=time[:lim],
-                    cmap='viridis', marker='o', s=8, zorder=1)
-    cb = plt.colorbar(sc, shrink=0.8)
+                    cmap='cividis', marker='o', s=8, zorder=1)
+    cb = plt.colorbar(sc, ax=ax, orientation='vertical', fraction=0.15, pad=0.1)
     cb.set_label('Time (s)')
-    fig.tight_layout()
+    if save:
+        plt.savefig(key + ':' + bus + '.png', dpi=600)
     plt.show()
     return
 
@@ -251,6 +285,7 @@ def plot_bus_voltage_dir(data, bus, limit=None, show_line=False):
 def tsi_from_angle(data, tol=5):
     """
     Transient Stability Index (TSI) for the simulation.
+
     TSI is obtained from the machine swing angles,
     in regard to the slack bus angle (i.e. machine G2).
 
@@ -291,7 +326,7 @@ def tsi_from_angle(data, tol=5):
     return tsi
 
 
-def plot_machine_multi_figure(data, key, plant, bus, save=False):
+def plot_machine_multi_figure(data, key, plant, save=False):
     """
     Plot machine signals with multiple subplots.
 
@@ -308,11 +343,6 @@ def plot_machine_multi_figure(data, key, plant, bus, save=False):
     plant : str
         String identifying machine for which signals will
         be plotted, e.g. 'PowerPlant_07'.
-    bus : str
-        String identifying main bus for which voltages will
-        be plotted, e.g. 'BUS2'. This should be the HV bus
-        of the step-up transformer through which the machine
-        from the `plant` variable is connected to the grid.
     save : bool, default=False
         Indicator for saving the figure to external file.
 
@@ -320,18 +350,20 @@ def plot_machine_multi_figure(data, key, plant, bus, save=False):
     -------
     Shows a matplotlib figure.
     """
-    data = data[key].copy()
+    data = data[key]
     tsi = 0
     fig = plt.figure(figsize=(7, 6.5), layout='constrained')
     gs = GridSpec(3, 3, figure=fig)
     # Top row subplot.
     ax_top = fig.add_subplot(gs[0, :])
-    ax_top.plot(data['time'], data[bus + '/Vrms_a'], label='phase a', c='grey')
-    ax_top.plot(data['time'], data[bus + '/Vrms_b'], label='phase b', c='grey', ls='--')
-    ax_top.plot(data['time'], data[bus + '/Vrms_c'], label='phase c')
-    ax_top.legend(loc='lower right', frameon=True, fancybox=True)
+    for name in data.columns:
+        if 'Pe' in name:
+            pp = name.split('/')[0]
+            if pp == plant:
+                ax_top.plot(data['time'], data[name],
+                            c='royalblue', label=plant)
     ax_top.set_xlabel('Time (s)')
-    ax_top.set_ylabel('Voltage (pu)')
+    ax_top.set_ylabel('Active power (pu)')
     ax_top.grid()
     # Main area subplot.
     ax_mid = fig.add_subplot(gs[1:, 0:-1])
@@ -393,7 +425,7 @@ def plot_ren_multi_figure(data, key, plant, save=False):
     -------
     Shows a matplotlib figure.
     """
-    data = data[key].copy()
+    data = data[key]
     fig = plt.figure(figsize=(7, 6.5), layout='constrained')
     gs = GridSpec(3, 3, figure=fig)
     # Top row subplot.

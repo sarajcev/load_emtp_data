@@ -11,13 +11,13 @@ Variant V0 is a classical IEEE New England 39-bus power system
 with no renewables.
 
 Variant V1 is an adapted IEEE New England 39-bus power system 
-with 18% share of renewables. Total power production in this
-system equals 6192 MW, of which 5075.8 MW is from conventional 
-power plants and 1116.13 MW is from the renewables, where 
-742.43 MW is produced by the Wind farm and 373.7 MW by the
-PV plant. Conventional power plants G5 and G8 were excluded
-and replaced by the PV plant and the Wind farm, respectively. 
-Aggregated Wind and PV models were used.
+with 20% share of renewables. Total power production in this
+system equals 6187.82 MW, of which 1242,86 MW (20.08%) is from 
+the renewables, where 742.43 MW (12%) is produced by the Wind 
+farm and 500.43 MW (8.08%) by the PV plant. Conventional power 
+plants G5 and G8 were excluded and replaced by the PV plant and 
+the Wind farm, respectively. Aggregated Wind and PV models were 
+used.
 
 Three short-circuits (SC) types are: three-phase (SC3), two-phase,
 i.e. phase-to-phase fault between phases 'b' and 'c' (SC2), and a 

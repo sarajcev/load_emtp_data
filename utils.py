@@ -62,9 +62,9 @@ def create_white_list(varnames, exclude, buses, variant):
         white_list.extend(['DEV2/P', 'DEV2/Q'])
         white_list.extend(['DEV2/V0', 'DEV2/V1', 'DEV2/V2'])
         white_list.extend(['DEV2/I0', 'DEV2/I1', 'DEV2/I2'])
-        white_list.append('FFC_WP2/Wind_Turbine/PMSG_T_rotor')
-        white_list.append('FFC_WP2/Wind_Turbine/PMSG_w_rotor')
-        white_list.append('FFC_WP2/Converter_control/Control/Grid_Ctrl/FRT_flag')
+        white_list.append('FFC_WP1/Wind_Turbine/PMSG_T_rotor')
+        white_list.append('FFC_WP1/Wind_Turbine/PMSG_w_rotor')
+        white_list.append('FFC_WP1/Converter_control/Control/Grid_Ctrl/FRT_flag')
         # Solar park signals (DEV3).
         white_list.extend(['DEV3/P', 'DEV3/Q'])
         white_list.extend(['DEV3/V0', 'DEV3/V1', 'DEV3/V2'])
@@ -132,7 +132,7 @@ def plot_machine_delta_signals(data, title=False):
     Returns
     -------
     Show matplotlib figure with plots of machine angles
-    with regards to the slack bus.
+    in regard to the slack bus.
 
     Notes
     -----
@@ -142,7 +142,7 @@ def plot_machine_delta_signals(data, title=False):
     time = data['time'].values
     # Slack bus is represented by the machine G2.
     slack_signal = data['PowerPlant_02/Teta_1_SM1'].values
-
+    
     fig, ax = plt.subplots(figsize=(6.5, 3.5))
     if title:
         ax.set_title(title, fontsize=9)
@@ -253,11 +253,12 @@ def plot_bus_voltage(data, key, bus, t_sc=0.1, limit=None,
     ax_top = ax[0]
     ax[1].remove()
     # Top row subplot.
-    ax_top.plot(data['time'], data[bus + '/Vrms_a'], label='phase a', c='darkorange')
-    ax_top.plot(data['time'], data[bus + '/Vrms_b'], label='phase b', c='grey')
+    ax_top.plot(data['time'], data[bus + '/Vrms_a'], label='phase a')
+    ax_top.plot(data['time'], data[bus + '/Vrms_b'], label='phase b')
     ax_top.plot(data['time'], data[bus + '/Vrms_c'], label='phase c')
+    ax_top.plot(data['time'], mag, ls='--', c='dimgrey', label='dir. comp.')
     ax_top.axvspan(0, limit, color='wheat', alpha=0.3)
-    ax_top.legend(loc='lower right', frameon=True, fancybox=True)
+    ax_top.legend(loc='lower right', frameon=True, fancybox=True, fontsize=9)
     ax_top.set_xlabel('Time (s)')
     ax_top.set_ylabel('Voltage (pu)')
     ax_top.grid()
@@ -352,13 +353,12 @@ def plot_machine_multi_figure(data, key, plant, save=False):
     """
     data = data[key]
     tsi = 0
-    fig = plt.figure(figsize=(7, 6.5), layout='constrained')
+    fig = plt.figure(figsize=(6.5, 6), layout='constrained')
     gs = GridSpec(3, 3, figure=fig)
     # Top row subplot.
     ax_top = fig.add_subplot(gs[0, :])
-    ax_top.plot(data['time'], data[plant + '/Pe_SM1'],
-                c='royalblue', label='/Pe_SM1')
-    ax_top.legend(loc='best', frameon=True, fancybox=True)
+    ax_top.plot(data['time'], data[plant + '/Pe_SM1'], label='/Pe_SM1')
+    ax_top.legend(loc='lower right', frameon=True, fancybox=True, fontsize=9)
     ax_top.set_xlabel('Time (s)')
     ax_top.set_ylabel('Power (pu)')
     ax_top.grid()
@@ -379,14 +379,15 @@ def plot_machine_multi_figure(data, key, plant, save=False):
     ax_mid.grid()
     # Right side upper subplot.
     ax_le1 = fig.add_subplot(gs[1, 2])
-    ax_le1.plot(data[plant + '/vd_SM1'], data[plant + '/vq_SM1'], lw=1)
+    ax_le1.plot(data[plant + '/vd_SM1'], data[plant + '/vq_SM1'],
+                c='seagreen', lw=1)
     ax_le1.set_xlabel('vd (pu)')
     ax_le1.set_ylabel('vq (pu)')
     ax_le1.grid()
     # Right side lower subplot.
     ax_le2 = fig.add_subplot(gs[2, 2])
     ax_le2.plot(data[plant + '/id_SM1'], data[plant + '/iq_SM1'],
-                c='steelblue', lw=1)
+                c='darkorange', lw=1)
     ax_le2.set_xlabel('id (pu)')
     ax_le2.set_ylabel('iq (pu)')
     ax_le2.grid()
@@ -423,8 +424,8 @@ def plot_ren_multi_figure(data, key, plant, save=False):
     Shows a matplotlib figure.
     """
     data = data[key]
-    fig = plt.figure(figsize=(7, 6.5), layout='constrained')
-    gs = GridSpec(3, 3, figure=fig)
+    fig = plt.figure(figsize=(6.5, 5), layout='constrained')
+    gs = GridSpec(3, 3, figure=fig, height_ratios=[2, 2, 1])
     # Top row subplot.
     ax_top = fig.add_subplot(gs[0, :])
     ax_top.plot(data['time'], data[plant + '/P']/1e6, label='active (P)')
@@ -454,7 +455,7 @@ def plot_ren_multi_figure(data, key, plant, save=False):
     ax2.grid()
     # Bottom row subplot.
     ax_bot = fig.add_subplot(gs[2, :])
-    ax_bot.plot(data['time'], data[plant + '/FRT_flag'])
+    ax_bot.plot(data['time'], data[plant + '/FRT_flag'], c='steelblue')
     ax_bot.set_xlabel('Time (s)')
     ax_bot.set_ylabel('FRT flag')
     ax_bot.grid()

@@ -102,6 +102,7 @@ def plot_machine_signals(data, category, title=False):
     DataFrame is exported from the simulation class.
     """
     time = data['time'].values
+
     fig, ax = plt.subplots(figsize=(6.5, 3.5))
     if title:
         ax.set_title(title, fontsize=9)
@@ -115,6 +116,7 @@ def plot_machine_signals(data, category, title=False):
     ax.set_ylabel(category)
     fig.tight_layout()
     plt.show()
+
     return
 
 
@@ -164,6 +166,7 @@ def plot_machine_delta_signals(data, title=False):
     ax.set_ylabel('Angle difference')
     fig.tight_layout()
     plt.show()
+
     return
 
 
@@ -186,6 +189,7 @@ def plot_bus_voltages_rms(data, bus, xlim=None):
     Show matplotlib figure.
     """
     time = data['time'].values
+
     fig, ax = plt.subplots(figsize=(6.5, 3.5))
     ax.set_title(f'RMS voltage at: {bus}', fontsize=10)
     ax.plot(time, data[bus+'/Vrms_a'], ls='-', lw=1.5, label='Vrms_a')
@@ -199,6 +203,7 @@ def plot_bus_voltages_rms(data, bus, xlim=None):
         ax.set_xlim(0, xlim)
     fig.tight_layout()
     plt.show()
+
     return
 
 
@@ -252,6 +257,7 @@ def plot_bus_voltage(data, key, bus, t_sc=0.1, limit=None,
                            height_ratios=[1, 3])
     ax_top = ax[0]
     ax[1].remove()
+
     # Top row subplot.
     ax_top.plot(data['time'], data[bus + '/Vrms_a'], label='phase a')
     ax_top.plot(data['time'], data[bus + '/Vrms_b'], label='phase b')
@@ -262,6 +268,7 @@ def plot_bus_voltage(data, key, bus, t_sc=0.1, limit=None,
     ax_top.set_xlabel('Time (s)')
     ax_top.set_ylabel('Voltage (pu)')
     ax_top.grid()
+
     # Main area subplot.
     ax = fig.add_subplot(2, 1, 2, projection='polar')
     ax.text(ang[t_start], mag[t_start], 't = 0.1 s', color='red', fontsize=9)
@@ -277,9 +284,11 @@ def plot_bus_voltage(data, key, bus, t_sc=0.1, limit=None,
                     cmap='cividis', marker='o', s=8, zorder=1)
     cb = plt.colorbar(sc, ax=ax, orientation='vertical', fraction=0.15, pad=0.1)
     cb.set_label('Time (s)')
+
     if save:
         plt.savefig(key + ':' + bus + '.png', dpi=600)
     plt.show()
+
     return
 
 
@@ -355,6 +364,7 @@ def plot_machine_multi_figure(data, key, plant, save=False):
     tsi = 0
     fig = plt.figure(figsize=(6.5, 6), layout='constrained')
     gs = GridSpec(3, 3, figure=fig)
+
     # Top row subplot.
     ax_top = fig.add_subplot(gs[0, :])
     ax_top.plot(data['time'], data[plant + '/Pe_SM1'], label='/Pe_SM1')
@@ -362,6 +372,7 @@ def plot_machine_multi_figure(data, key, plant, save=False):
     ax_top.set_xlabel('Time (s)')
     ax_top.set_ylabel('Power (pu)')
     ax_top.grid()
+
     # Main area subplot.
     ax_mid = fig.add_subplot(gs[1:, 0:-1])
     for name in data.columns:
@@ -377,6 +388,9 @@ def plot_machine_multi_figure(data, key, plant, save=False):
     ax_mid.set_xlabel('Time (s)')
     ax_mid.set_ylabel('Rotor angle (deg)')
     ax_mid.grid()
+    if tsi:
+        ax_mid.set_ylim(bottom=0, top=500)
+
     # Right side upper subplot.
     ax_le1 = fig.add_subplot(gs[1, 2])
     ax_le1.plot(data[plant + '/vd_SM1'], data[plant + '/vq_SM1'],
@@ -384,6 +398,7 @@ def plot_machine_multi_figure(data, key, plant, save=False):
     ax_le1.set_xlabel('vd (pu)')
     ax_le1.set_ylabel('vq (pu)')
     ax_le1.grid()
+
     # Right side lower subplot.
     ax_le2 = fig.add_subplot(gs[2, 2])
     ax_le2.plot(data[plant + '/id_SM1'], data[plant + '/iq_SM1'],
@@ -391,11 +406,11 @@ def plot_machine_multi_figure(data, key, plant, save=False):
     ax_le2.set_xlabel('id (pu)')
     ax_le2.set_ylabel('iq (pu)')
     ax_le2.grid()
-    if tsi:
-        ax_mid.set_ylim(bottom=0, top=500)
+
     if save:
         plt.savefig(key + ':' + plant + '.png', dpi=600)
     plt.show()
+
     return
 
 
@@ -426,6 +441,7 @@ def plot_ren_multi_figure(data, key, plant, save=False):
     data = data[key]
     fig = plt.figure(figsize=(6.5, 5), layout='constrained')
     gs = GridSpec(3, 3, figure=fig, height_ratios=[2, 2, 1])
+
     # Top row subplot.
     ax_top = fig.add_subplot(gs[0, :])
     ax_top.plot(data['time'], data[plant + '/P']/1e6, label='active (P)')
@@ -434,6 +450,7 @@ def plot_ren_multi_figure(data, key, plant, save=False):
     ax_top.set_xlabel('Time (s)')
     ax_top.set_ylabel('Power (MW)')
     ax_top.grid()
+
     # Middle row subplots.
     ax0 = fig.add_subplot(gs[1, 0])
     ax0.plot(data['time'], data[plant + '/V1']/1e3, label='V1')
@@ -453,13 +470,16 @@ def plot_ren_multi_figure(data, key, plant, save=False):
     ax2.set_xlabel('Time (s)')
     #ax2.set_ylabel('Voltage (pu)')
     ax2.grid()
+
     # Bottom row subplot.
     ax_bot = fig.add_subplot(gs[2, :])
     ax_bot.plot(data['time'], data[plant + '/FRT_flag'], c='steelblue')
     ax_bot.set_xlabel('Time (s)')
     ax_bot.set_ylabel('FRT flag')
     ax_bot.grid()
+
     if save:
         plt.savefig(key + ':' + plant + '.png', dpi=600)
     plt.show()
+
     return

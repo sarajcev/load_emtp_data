@@ -58,19 +58,37 @@ def create_white_list(varnames, exclude, buses, variant):
     
     # Renewables connected to the power system?
     if variant in ['V1', 'V2', 'V3']:
-        # Wind farm signals (DEV2).
+        # Wind farm signals (DEV2). 
+        # This WF replaces machine G8.
         white_list.extend(['DEV2/P', 'DEV2/Q'])
         white_list.extend(['DEV2/V0', 'DEV2/V1', 'DEV2/V2'])
         white_list.extend(['DEV2/I0', 'DEV2/I1', 'DEV2/I2'])
         white_list.append('FFC_WP1/Wind_Turbine/PMSG_T_rotor')
         white_list.append('FFC_WP1/Wind_Turbine/PMSG_w_rotor')
         white_list.append('FFC_WP1/Converter_control/Control/Grid_Ctrl/FRT_flag')
-        # Solar park signals (DEV3).
+        # PV plant signals (DEV3). 
+        # This PV replaces machine G5.
         white_list.extend(['DEV3/P', 'DEV3/Q'])
         white_list.extend(['DEV3/V0', 'DEV3/V1', 'DEV3/V2'])
         white_list.extend(['DEV3/I0', 'DEV3/I1', 'DEV3/I2'])
         white_list.append('WECC_PVPark_1/Converter_control/Control/GridControl_DLL/FRT_flag')
     
+    if variant in ['V2', 'V3']:
+        # Wind farm 2 (WF2) signals (DEV4).
+        # This WF replaces machine G9.
+        white_list.extend(["DEV4/P", "DEV4/Q"])
+        white_list.extend(["DEV4/V0", "DEV4/V1", "DEV4/V2"])
+        white_list.extend(["DEV4/I0", "DEV4/I1", "DEV4/I2"])
+        white_list.append("FFC_WP2/Wind_Turbine/PMSG_T_rotor")
+        white_list.append("FFC_WP2/Wind_Turbine/PMSG_w_rotor")
+        white_list.append("FFC_WP2/Converter_control/Control/Grid_Ctrl/FRT_flag")
+        # PV plant 2 (PV2) signals (DEV5).
+        # This PV replaces machine G3.
+        white_list.extend(["DEV5/P", "DEV5/Q"])
+        white_list.extend(["DEV5/V0", "DEV5/V1", "DEV5/V2"])
+        white_list.extend(["DEV5/I0", "DEV5/I1", "DEV5/I2"])
+        white_list.append("WECC_PVPark_2/Converter_control/Control/GridControl_DLL/FRT_flag"
+        )
     return white_list
 
 
@@ -445,8 +463,8 @@ def plot_ren_multi_figure(data, key, plant, save=False):
     # Top row subplot.
     ax_top = fig.add_subplot(gs[0, :])
     ax_top.plot(data['time'], data[plant + '/P']/1e6, label='active (P)')
-    ax_top.plot(data['time'], data[plant + '/Q']/1e6, label='reactive (Q)')
-    ax_top.legend(loc='best', frameon=True, fancybox=True)
+    ax_top.plot(data['time'], data[plant + '/Q']/1e6, label='react. (Q)')
+    ax_top.legend(loc='best', frameon=True, fancybox=True, fontsize=9)
     ax_top.set_xlabel('Time (s)')
     ax_top.set_ylabel('Power (MW)')
     ax_top.grid()

@@ -11,16 +11,27 @@ Variant V0 is a classical IEEE New England 39-bus power system
 with no renewables.
 
 Variant V1 is an adapted IEEE New England 39-bus power system 
-with 20% share of renewables. Total power production in this
-system equals 6187.82 MW, of which 1242,86 MW (20.08%) is from 
+with a 20% share of renewables. Total power production in this
+system equals 6187.82 MW, of which 1242.86 MW (20.08%) is from 
 the renewables, where 742.43 MW (12%) is produced by the Wind 
-farm and 500.43 MW (8.08%) by the PV plant. Conventional power 
-plants G5 and G8 were excluded and replaced by the PV plant and 
-the Wind farm, respectively. Aggregated Wind and PV models were 
-used.
+farm (750 MW installed capacity) and 500.43 MW (8.08%) by the 
+PV plant (500 MW installed capacity). Conventional power plants 
+G5 and G8 were excluded and replaced by the PV plant and wind 
+farm (WF), respectively. Aggregated Wind and PV models were used.
+
+Variant V2 is an adapted IEEE New England 39-bus power system 
+with a 40% share of renewables. Conventional power plants G3, G5,
+G8 and G9 were excluded and replaced by renewables. Two PV plants 
+and two wind farms were connected, where PV plant replaces G5, PV2 
+plant replaces G5, while wind farm WF replaces G8 and WF2 replaces 
+G9. Total power production in this system equals 6176.7 MW, of 
+which 2485.72 MW (40.24%) is from the renewables, where 1484.86 MW 
+(24.04%) comes from wind farms (2x750 MW installed capacity) and 
+1000.86 MW (16.20%) is from the PV plants (2x500 MW installed 
+capacity). Aggregated Wind and PV models were used. 
 
 Three short-circuits (SC) types are: three-phase (SC3), two-phase,
-i.e. phase-to-phase fault between phases 'b' and 'c' (SC2), and a 
+i.e. phase-to-phase fault between phases 'a' and 'b' (SC2), and a 
 single-phase to ground fault in phase 'a' (SC1). Arc resistance
 was neglected.
 
@@ -43,7 +54,9 @@ Wind Farm have a 'WF' prefix and those from the PV plant have a
 name. Fault Ride Through (FRT) signals for the Wind farm and PV 
 plant were recorded as well (when they are present in the system), 
 where violations of FRT criteria are identified by changing the 
-indicator from 0 to 1.
+indicator from 0 to 1. When two PV plants are present, the second
+one is prefixed with PV2; the same is for wind farms, where the
+second one is then prefixed by WF2.
 
 PowerPlant signals variable names:
     '/Teta_1_SM1',   # rotor angle (deg)
@@ -57,22 +70,22 @@ PowerPlant signals variable names:
     '/iq_SM1',  # q-axis stator current (p.u.)
 
 WindFarm (WF) signals variable names:
-    'WF/P'   # active power (W)
-    'WF/Q'   # reactive power (VAR)
-    'WF/V0', 'WF/I0'  # zero sequence voltage & current (V, A)
-    'WF/V1', 'WF/I1'  # direct sequence voltage & current (V, A)
-    'WF/V2', 'WF/I2'  # inverse sequence voltage & current (V, A)
-    'WF/PMSG_T_rotor'  # aggregated wind turbines torque
-    'WF/PMSG_w_rotor'  # aggregated wind turbines speed
-    'WF/FRT_flag'      # wind farm FRT indicator
+    '/P'   # active power (W)
+    '/Q'   # reactive power (VAR)
+    '/V0', 'WF/I0'  # zero sequence voltage & current (V, A)
+    '/V1', 'WF/I1'  # direct sequence voltage & current (V, A)
+    '/V2', 'WF/I2'  # inverse sequence voltage & current (V, A)
+    '/PMSG_T_rotor'  # aggregated wind turbines torque
+    '/PMSG_w_rotor'  # aggregated wind turbines speed
+    '/FRT_flag'      # wind farm FRT indicator
 
 PVPlant (PV) signals variable names:
-    'PV/P'   # active power (W)
-    'PV/Q'   # reactive power (VAR)
-    'PV/V0', 'PV/I0'  # zero sequence voltage & current (V, A)
-    'PV/V1', 'PV/I1'  # direct sequence voltage & current (V, A)
-    'PV/V2', 'PV/I2'  # inverse sequence voltage & current (V, A)
-    'PV/FRT_flag'     # PV plant FRT indicator
+    '/P'   # active power (W)
+    '/Q'   # reactive power (VAR)
+    '/V0', 'PV/I0'  # zero sequence voltage & current (V, A)
+    '/V1', 'PV/I1'  # direct sequence voltage & current (V, A)
+    '/V2', 'PV/I2'  # inverse sequence voltage & current (V, A)
+    '/FRT_flag'     # PV plant FRT indicator
 
 BUS signals variable names:
     '/Vrms_a'    # RMS voltage in phase a (p.u.)

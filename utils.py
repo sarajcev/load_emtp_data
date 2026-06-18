@@ -213,7 +213,9 @@ def plot_bus_voltages_rms(data, bus, xlim=None):
     ax.plot(time, data[bus+'/Vrms_a'], ls='-', lw=1.5, label='Vrms_a')
     ax.plot(time, data[bus+'/Vrms_b'], ls='-', lw=1.5, label='Vrms_b')
     ax.plot(time, data[bus+'/Vrms_c'], ls='-', lw=1.5, label='Vrms_c')
-    ax.legend(loc='lower right', frameon=True, fancybox=True, fontsize=8)
+    ax.plot(time, data[bus+'/V1_mag'], ls="--", lw=1.5,
+            c="dimgrey", label="dir. comp.")
+    ax.legend(loc='lower right', frameon=True, fancybox=True, fontsize=9)
     ax.grid(which='major', axis='both')
     ax.set_xlabel('Time (s)')
     ax.set_ylabel('RMS voltage (p.u.)')

@@ -74,6 +74,7 @@ def create_white_list(varnames, exclude, buses, variant):
         white_list.append('WECC_PVPark_1/Converter_control/Control/GridControl_DLL/FRT_flag')
     
     if variant in ['V2', 'V3']:
+        # These are variants with 40% share of renewables.
         # Wind farm 2 (WF2) signals (DEV4).
         # This WF replaces machine G9.
         white_list.extend(["DEV4/P", "DEV4/Q"])
@@ -89,6 +90,18 @@ def create_white_list(varnames, exclude, buses, variant):
         white_list.extend(["DEV5/I0", "DEV5/I1", "DEV5/I2"])
         white_list.append("WECC_PVPark_2/Converter_control/Control/GridControl_DLL/FRT_flag"
         )
+    
+    if variant in ['V4']:
+        # This is a variant with 60% share of renewables.
+        # PV plant 3 (PV3) signals (DEV6).
+        # This PV replaces machine G10.
+        white_list.extend(["DEV6/P", "DEV6/Q"])
+        white_list.extend(["DEV6/V0", "DEV6/V1", "DEV6/V2"])
+        white_list.extend(["DEV6/I0", "DEV6/I1", "DEV6/I2"])
+        white_list.append(
+            "WECC_PVPark_3/Converter_control/Control/GridControl_DLL/FRT_flag"
+        )
+    
     return white_list
 
 
@@ -312,7 +325,7 @@ def plot_bus_voltage(data, key, bus, t_sc=0.1, limit=None,
     return
 
 
-def tsi_from_angle(data, tol=5):
+def tsi_from_angle(data, tol=60):
     """
     Transient Stability Index (TSI) for the simulation.
 
@@ -323,7 +336,7 @@ def tsi_from_angle(data, tol=5):
     ----------
     data : DataFrame
         Pandas DataFrame holding simulation signals.
-    tol : float, default=5
+    tol : float, default=60
         Tolerance for signal detection in degrees.
 
     Returns

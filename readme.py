@@ -7,10 +7,10 @@ three different short-circuit types on main buses and half-points
 of all transmission lines in the IEEE New England 39-bus power 
 system with and without the inclusion of renewable sources.
 
-Variant V0 is a classical IEEE New England 39-bus power system
+Variant V0: is a classical IEEE New England 39-bus power system
 with no renewables.
 
-Variant V1 is an adapted IEEE New England 39-bus power system 
+Variant V1: is an adapted IEEE New England 39-bus power system 
 with a 20% share of renewables. Total power production in this
 system equals 6187.82 MW, of which 1242.86 MW (20.08%) is from 
 the renewables, where 742.43 MW (12%) is produced by the Wind 
@@ -19,16 +19,21 @@ PV plant (500 MW installed capacity). Conventional power plants
 G5 and G8 were excluded and replaced by the PV plant and wind 
 farm (WF), respectively. Aggregated Wind and PV models were used.
 
-Variant V2 is an adapted IEEE New England 39-bus power system 
+Variant V2: is an adapted IEEE New England 39-bus power system 
 with a 40% share of renewables. Conventional power plants G3, G5,
 G8 and G9 were excluded and replaced by renewables. Two PV plants 
 and two wind farms were connected, where PV plant replaces G5, PV2 
-plant replaces G5, while wind farm WF replaces G8 and WF2 replaces 
+plant replaces G3, while wind farm WF replaces G8 and WF2 replaces 
 G9. Total power production in this system equals 6176.7 MW, of 
 which 2485.72 MW (40.24%) is from the renewables, where 1484.86 MW 
 (24.04%) comes from wind farms (2x750 MW installed capacity) and 
 1000.86 MW (16.20%) is from the PV plants (2x500 MW installed 
-capacity). Aggregated Wind and PV models were used. 
+capacity). Aggregated Wind and PV models were used.
+
+Variant V3: features the same power system as Variant V2, but the
+connections of PV plant and Wind farm 2 (WF2) are interchanged, 
+so that the PV plant is now connected to BUS29 (replaces G9) and 
+Wind farm 2 (WF2) is connected to BUS34 (replaces G5).
 
 Three short-circuits (SC) types are: three-phase (SC3), two-phase,
 i.e. phase-to-phase fault between phases 'a' and 'b' (SC2), and a 
@@ -43,9 +48,10 @@ starts at 0.1 s and has a duration as indicated in the file name
 obtained from the load flow analysis.
 
 To each key is assigned a Pandas DataFrame which holds time-domain
-signals from the transient analysis of that particular SC type and
-location. Analysis was carried out in the EMTP-RV, using Parametric
-Studio, with a 40 us time step and a 2 ms output resolution.
+signals from the transient analysis of that particular SC type 
+and location. Systematic analysis was carried out in the EMTP-RV, 
+using Parametric Studio, with a 40 us time step and a 2 ms output 
+resolution. Simulation time is 4 seconds.
 
 Signals from conventional plants are prefixed by the 'PowerPlant'
 word. In variants where renewables are present, signals from the 

@@ -16,24 +16,27 @@ system equals 6187.82 MW, of which 1242.86 MW (20.08%) is from
 the renewables, where 742.43 MW (12%) is produced by the Wind 
 farm (750 MW installed capacity) and 500.43 MW (8.08%) by the 
 PV plant (500 MW installed capacity). Conventional power plants 
-G5 and G8 were excluded and replaced by the PV plant and wind 
-farm (WF), respectively. Aggregated Wind and PV models were used.
+G5 (at BUS34) and G8 (at BUS37) were excluded and replaced by 
+the PV plant and wind farm (WF), respectively. Aggregated Wind 
+and PV models were used.
 
 Variant V2: is an adapted IEEE New England 39-bus power system 
 with a 40% share of renewables. Conventional power plants G3, G5,
 G8 and G9 were excluded and replaced by renewables. Two PV plants 
-and two wind farms were connected, where PV plant replaces G5, PV2 
-plant replaces G3, while wind farm WF replaces G8 and WF2 replaces 
-G9. Total power production in this system equals 6176.7 MW, of 
-which 2485.72 MW (40.24%) is from the renewables, where 1484.86 MW 
-(24.04%) comes from wind farms (2x750 MW installed capacity) and 
-1000.86 MW (16.20%) is from the PV plants (2x500 MW installed 
-capacity). Aggregated Wind and PV models were used.
+and two wind farms were connected, where PV plant replaces G5 
+(at BUS34), PV2 plant replaces G3 (at BUS32), while wind farm WF 
+replaces G8 (at BUS37) and WF2 replaces G9 (at BUS38). Total power 
+production in this system equals 6176.7 MW, of which 2485.72 MW 
+(40.24%) is from the renewables, where 1484.86 MW (24.04%) comes 
+from wind farms (2x750 MW installed capacity) and 1000.86 MW 
+(16.20%) is from the PV plants (2x500 MW installed capacity). 
+Aggregated Wind and PV models were used.
 
-Variant V3: features the same power system as Variant V2, but the
-connections of PV plant and Wind farm 2 (WF2) are interchanged, 
-so that the PV plant is now connected to BUS29 (replaces G9) and 
-Wind farm 2 (WF2) is connected to BUS34 (replaces G5).
+Variant V3: features the same power system as Variant V2, with
+four renewable sources (2xPV & 2xWF), but the connections of PV 
+plant and Wind farm 2 (WF2) are interchanged, so that the PV 
+plant is now connected to BUS29 (replaces G9) and Wind farm 2 
+(WF2) is connected to BUS34 (replaces G5).
 
 Three short-circuits (SC) types are: three-phase (SC3), two-phase,
 i.e. phase-to-phase fault between phases 'a' and 'b' (SC2), and a 

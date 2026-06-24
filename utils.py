@@ -71,35 +71,38 @@ def create_white_list(varnames, exclude, buses, variant):
         white_list.extend(['DEV3/P', 'DEV3/Q'])
         white_list.extend(['DEV3/V0', 'DEV3/V1', 'DEV3/V2'])
         white_list.extend(['DEV3/I0', 'DEV3/I1', 'DEV3/I2'])
-        white_list.append('WECC_PVPark_1/Converter_control/Control/GridControl_DLL/FRT_flag')
+        white_list.append(
+            'WECC_PVPark_1/Converter_control/Control/GridControl_DLL/FRT_flag'
+        )
     
     if variant in ['V2', 'V3']:
         # These are variants with 40% share of renewables.
         # Wind farm 2 (WF2) signals (DEV4).
         # This WF replaces machine G9.
-        white_list.extend(["DEV4/P", "DEV4/Q"])
-        white_list.extend(["DEV4/V0", "DEV4/V1", "DEV4/V2"])
-        white_list.extend(["DEV4/I0", "DEV4/I1", "DEV4/I2"])
-        white_list.append("FFC_WP2/Wind_Turbine/PMSG_T_rotor")
-        white_list.append("FFC_WP2/Wind_Turbine/PMSG_w_rotor")
-        white_list.append("FFC_WP2/Converter_control/Control/Grid_Ctrl/FRT_flag")
+        white_list.extend(['DEV4/P', 'DEV4/Q'])
+        white_list.extend(['DEV4/V0', 'DEV4/V1', 'DEV4/V2'])
+        white_list.extend(['DEV4/I0', 'DEV4/I1', 'DEV4/I2'])
+        white_list.append('FFC_WP2/Wind_Turbine/PMSG_T_rotor')
+        white_list.append('FFC_WP2/Wind_Turbine/PMSG_w_rotor')
+        white_list.append('FFC_WP2/Converter_control/Control/Grid_Ctrl/FRT_flag')
         # PV plant 2 (PV2) signals (DEV5).
         # This PV replaces machine G3.
-        white_list.extend(["DEV5/P", "DEV5/Q"])
-        white_list.extend(["DEV5/V0", "DEV5/V1", "DEV5/V2"])
-        white_list.extend(["DEV5/I0", "DEV5/I1", "DEV5/I2"])
-        white_list.append("WECC_PVPark_2/Converter_control/Control/GridControl_DLL/FRT_flag"
+        white_list.extend(['DEV5/P', 'DEV5/Q'])
+        white_list.extend(['DEV5/V0', 'DEV5/V1', 'DEV5/V2'])
+        white_list.extend(['DEV5/I0', 'DEV5/I1', 'DEV5/I2'])
+        white_list.append(
+            'WECC_PVPark_2/Converter_control/Control/GridControl_DLL/FRT_flag'
         )
     
     if variant in ['V4']:
         # This is a variant with 60% share of renewables.
         # PV plant 3 (PV3) signals (DEV6).
         # This PV replaces machine G10.
-        white_list.extend(["DEV6/P", "DEV6/Q"])
-        white_list.extend(["DEV6/V0", "DEV6/V1", "DEV6/V2"])
-        white_list.extend(["DEV6/I0", "DEV6/I1", "DEV6/I2"])
+        white_list.extend(['DEV6/P', 'DEV6/Q'])
+        white_list.extend(['DEV6/V0', 'DEV6/V1', 'DEV6/V2'])
+        white_list.extend(['DEV6/I0', 'DEV6/I1', 'DEV6/I2'])
         white_list.append(
-            "WECC_PVPark_3/Converter_control/Control/GridControl_DLL/FRT_flag"
+            'WECC_PVPark_3/Converter_control/Control/GridControl_DLL/FRT_flag'
         )
     
     return white_list

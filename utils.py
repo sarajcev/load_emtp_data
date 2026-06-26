@@ -57,7 +57,7 @@ def create_white_list(varnames, exclude, buses, variant):
         )
     
     # Renewables connected to the power system?
-    if variant in ['V1', 'V2', 'V3']:
+    if variant in ['V1', 'V2', 'V3', 'V4']:
         # Wind farm signals (DEV2). 
         # This WF replaces machine G8.
         white_list.extend(['DEV2/P', 'DEV2/Q'])
@@ -75,7 +75,7 @@ def create_white_list(varnames, exclude, buses, variant):
             'WECC_PVPark_1/Converter_control/Control/GridControl_DLL/FRT_flag'
         )
     
-    if variant in ['V2', 'V3']:
+    if variant in ['V2', 'V3', 'V4']:
         # These are variants with 40% share of renewables.
         # Wind farm 2 (WF2) signals (DEV4).
         # This WF replaces machine G9.

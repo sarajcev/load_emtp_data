@@ -156,7 +156,12 @@ def plot_machine_signals(data, category, title=False):
 
 def plot_machine_delta_signals(data, title=False):
     """
-    Plot machine angles in regard to the slack bus.
+    Plot machine angles in regard to the external grid.
+
+    Machine angles ploted in regard to the external grid,
+    which is represented by the generator G1. This machine
+    is traditionally used as a reference generator to which
+    all other generators' angles are referenced.
 
     Parameters
     ----------
@@ -168,16 +173,22 @@ def plot_machine_delta_signals(data, title=False):
     Returns
     -------
     Show matplotlib figure with plots of machine angles
-    in regard to the slack bus.
+    in regard to the external grid.
 
     Notes
     -----
     This function is tailored for the machine signals,
     which contain 'Teta' string in their name.
+
+    References
+    ----------
+    IEEE PES Task Force on Benchmark Systems for Stability Controls,
+    Report on the EMTP-RV 39-bus system (New England Reduced Model),
+    Version 1.5 - Mars 04, 2015.
     """
     time = data['time'].values
-    # Slack bus is represented by the machine G2.
-    slack_signal = data['PowerPlant_02/Teta_1_SM1'].values
+    # External grid is represented by the machine G1.
+    slack_signal = data['PowerPlant_01/Teta_1_SM1'].values
     
     fig, ax = plt.subplots(figsize=(6.5, 3.5))
     if title:
@@ -186,11 +197,11 @@ def plot_machine_delta_signals(data, title=False):
         if 'Teta' in name:
             signal = data[name].values
             pp = name.split('/')[0][-2:]
-            if pp == '02':
-                # This is the slack bus, skip it.
+            if pp == '01':
+                # This is the external grid, skip it.
                 continue
             else:
-                # Difference in the swing from the slack machine.
+                # Difference in the swing from the reference.
                 delta_signal = slack_signal - signal
                 ax.plot(time, delta_signal, ls='-', lw=1.5,
                         label=name.split('/')[0])

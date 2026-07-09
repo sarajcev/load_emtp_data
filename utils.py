@@ -108,7 +108,7 @@ def create_white_list(varnames, exclude, buses, variant):
     return white_list
 
 
-def plot_machine_signals(data, category, title=False):
+def plot_machine_signals(data, category, title=False, xlim=None, save=False):
     """
     Plot EMTP-RV simulation signals for the machines.
 
@@ -123,7 +123,12 @@ def plot_machine_signals(data, category, title=False):
         particular group of signals in the white list.
     title : bool, default=False
         Figure title from key.
-    
+    xlim : float or None, default=None
+        Time limit of the signal display. It is
+        ignored if None.
+    save : bool, default=False
+        Indicator for saving figure to disk.
+
     Returns
     -------
     Show matplotlib figure with plots of signals from the
@@ -139,7 +144,7 @@ def plot_machine_signals(data, category, title=False):
 
     fig, ax = plt.subplots(figsize=(6.5, 3.5))
     if title:
-        ax.set_title(title, fontsize=9)
+        ax.set_title(str(title), fontsize=9)
     for name in data.columns:
         if category in name:
             signal = data[name].values
@@ -148,13 +153,17 @@ def plot_machine_signals(data, category, title=False):
     ax.grid(which='major', axis='both')
     ax.set_xlabel('Time (s)')
     ax.set_ylabel(category)
+    if xlim is not None:
+        ax.set_xlim(0, xlim)
     fig.tight_layout()
+    if save:
+        plt.savefig(category + '_signals.pdf')
     plt.show()
 
     return
 
 
-def plot_machine_delta_signals(data, title=False):
+def plot_machine_delta_signals(data, title=False, save=False):
     """
     Plot machine angles in regard to the external grid.
 
@@ -169,7 +178,9 @@ def plot_machine_delta_signals(data, title=False):
         Pandas DataFrame holding simulation signals.
     title : bool, default=False
         Figure title from key.
-    
+    save : bool, default=False
+        Indicator for saving figure to disk.
+
     Returns
     -------
     Show matplotlib figure with plots of machine angles
@@ -192,7 +203,7 @@ def plot_machine_delta_signals(data, title=False):
     
     fig, ax = plt.subplots(figsize=(6.5, 3.5))
     if title:
-        ax.set_title(title, fontsize=9)
+        ax.set_title(str(title), fontsize=9)
     for name in data.columns:
         if 'Teta' in name:
             signal = data[name].values
@@ -208,14 +219,16 @@ def plot_machine_delta_signals(data, title=False):
     ax.legend(loc='upper right', frameon=True, fancybox=True, fontsize=8)
     ax.grid(which='major', axis='both')
     ax.set_xlabel('Time (s)')
-    ax.set_ylabel('Angle difference')
+    ax.set_ylabel('Angle difference (deg)')
     fig.tight_layout()
+    if save:
+        plt.savefig('machine_delta_signals.pdf')
     plt.show()
 
     return
 
 
-def plot_bus_voltages_rms(data, bus, xlim=None):
+def plot_bus_voltages_rms(data, bus, xlim=None, save=False):
     """
     Plot three-phase bus voltage RMS values.
 
@@ -228,7 +241,9 @@ def plot_bus_voltages_rms(data, bus, xlim=None):
     xlim : float or None, default=None
         Time limit of the signal display. It is
         ignored if None.
-    
+    save : bool, default=False
+        Indicator for saving figure to disk.
+
     Returns
     -------
     Show matplotlib figure.
@@ -249,6 +264,8 @@ def plot_bus_voltages_rms(data, bus, xlim=None):
     if xlim is not None:
         ax.set_xlim(0, xlim)
     fig.tight_layout()
+    if save:
+        plt.savefig(bus + '.pdf')
     plt.show()
 
     return
@@ -291,8 +308,9 @@ def plot_bus_voltage(data, key, bus, t_sc=0.1, limit=None,
     data = data[key]
     time = data['time'].values
     dt = time[1] - time[0]
-    t_start = int(0.1/dt)
-    t_end = int((0.1 + t_sc)/dt)
+    sc_start = 0.1  # instant of SC start
+    t_start = int(sc_start/dt)
+    t_end = int((sc_start + t_sc)/dt)
     if limit is None:
         lim = -1
     else:
@@ -300,7 +318,7 @@ def plot_bus_voltage(data, key, bus, t_sc=0.1, limit=None,
     mag = data[bus+'/V1_mag'].values
     ang = data[bus+'/V1_phase'].values
 
-    fig, ax = plt.subplots(2, 1, figsize=(5.5, 6.5),
+    fig, ax = plt.subplots(nrows=2, ncols=1, figsize=(5.5, 6.5),
                            height_ratios=[1, 3])
     ax_top = ax[0]
     ax[1].remove()
@@ -318,8 +336,10 @@ def plot_bus_voltage(data, key, bus, t_sc=0.1, limit=None,
 
     # Main area subplot.
     ax = fig.add_subplot(2, 1, 2, projection='polar')
-    ax.text(ang[t_start], mag[t_start], 't = 0.1 s', color='red', fontsize=9)
-    ax.text(ang[t_end], mag[t_end], f't = {0.1+t_sc} s', color='red', fontsize=9)
+    ax.text(ang[t_start], mag[t_start], f't = {sc_start} s',
+            color='red', fontsize=9)
+    ax.text(ang[t_end], mag[t_end], f't = {sc_start + t_sc} s',
+            color='red', fontsize=9)
     if show_line:
         ax.plot(ang[:t_start], mag[:t_start], c='dimgrey',
                 ls='--', lw=1, zorder=-1)
@@ -333,7 +353,7 @@ def plot_bus_voltage(data, key, bus, t_sc=0.1, limit=None,
     cb.set_label('Time (s)')
 
     if save:
-        plt.savefig(key + ':' + bus + '.png', dpi=600)
+        plt.savefig(key + ':' + bus + '.pdf')
     plt.show()
 
     return
@@ -413,7 +433,7 @@ def plot_machine_multi_figure(data, key, plant, save=False):
     data = data[key]
     tsi = 0
     fig = plt.figure(figsize=(6.5, 6), layout='constrained')
-    gs = GridSpec(3, 3, figure=fig)
+    gs = GridSpec(nrows=3, ncols=3, figure=fig)
 
     # Top row subplot.
     ax_top = fig.add_subplot(gs[0, :])
@@ -458,7 +478,7 @@ def plot_machine_multi_figure(data, key, plant, save=False):
     ax_le2.grid()
 
     if save:
-        plt.savefig(key + ':' + plant + '.png', dpi=600)
+        plt.savefig(key + ':' + plant + '.pdf')
     plt.show()
 
     return
@@ -490,7 +510,7 @@ def plot_ren_multi_figure(data, key, plant, save=False):
     """
     data = data[key]
     fig = plt.figure(figsize=(6.5, 5), layout='constrained')
-    gs = GridSpec(3, 3, figure=fig, height_ratios=[2, 2, 1])
+    gs = GridSpec(nrows=3, ncols=3, figure=fig, height_ratios=[2, 2, 1])
 
     # Top row subplot.
     ax_top = fig.add_subplot(gs[0, :])
@@ -529,7 +549,7 @@ def plot_ren_multi_figure(data, key, plant, save=False):
     ax_bot.grid()
 
     if save:
-        plt.savefig(key + ':' + plant + '.png', dpi=600)
+        plt.savefig(key + ':' + plant + '.pdf')
     plt.show()
 
     return

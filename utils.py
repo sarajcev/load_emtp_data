@@ -45,8 +45,12 @@ def create_white_list(varnames, exclude, buses, variant):
         # Direct sequence magnitude and phase angle.
         mag = 'BUS' + str(bus) + '/V1_mag'
         phase = 'BUS' + str(bus) + '/V1_phase'
+        # Frequency measurement.
+        freq = 'BUS' + str(bus) + '/Freq'
+        # Add variables to the white list.
         white_list.extend([busa, busb, busc])
         white_list.extend([mag, phase])
+        white_list.append(freq)
 
     # Machine signals.
     for name in varnames:
@@ -307,13 +311,19 @@ def plot_bus_voltage(data, key, bus, t_sc=0.1, limit=None,
     """
     data = data[key]
     time = data['time'].values
+
     dt = time[1] - time[0]
-    sc_start = 0.1  # instant of SC start
+    # Time of SC start, and index points for the SC start and end.
+    sc_start = 0.5
     t_start = int(sc_start/dt)
     t_end = int((sc_start + t_sc)/dt)
+    # Starting time and index point for plotting.
+    t_begin = sc_start - 0.1
+    ti_begin = int(t_begin/dt)
     if limit is None:
         lim = -1
     else:
+        # Index of the time limit for plotting.
         lim = int(limit/dt) + 1
     mag = data[bus+'/V1_mag'].values
     ang = data[bus+'/V1_phase'].values
@@ -328,26 +338,30 @@ def plot_bus_voltage(data, key, bus, t_sc=0.1, limit=None,
     ax_top.plot(data['time'], data[bus + '/Vrms_b'], label='phase b')
     ax_top.plot(data['time'], data[bus + '/Vrms_c'], label='phase c')
     ax_top.plot(data['time'], mag, ls='--', c='dimgrey', label='dir. comp.')
-    ax_top.axvspan(0, limit, color='wheat', alpha=0.3)
+    ax_top.axvspan(t_begin, limit, color='wheat', alpha=0.3)
     ax_top.legend(loc='lower right', frameon=True, fancybox=True, fontsize=9)
     ax_top.set_xlabel('Time (s)')
     ax_top.set_ylabel('Voltage (pu)')
     ax_top.grid()
 
-    # Main area subplot.
+    # Main area subplot (polar voltage plot).
     ax = fig.add_subplot(2, 1, 2, projection='polar')
+    # Mark the starting time of SC.
     ax.text(ang[t_start], mag[t_start], f't = {sc_start} s',
             color='red', fontsize=9)
+    # Mark the ending time of SC.
     ax.text(ang[t_end], mag[t_end], f't = {sc_start + t_sc} s',
             color='red', fontsize=9)
     if show_line:
-        ax.plot(ang[:t_start], mag[:t_start], c='dimgrey',
+        # Connect individual time points with lines.
+        ax.plot(ang[ti_begin:t_start], mag[ti_begin:t_start], c='dimgrey',
                 ls='--', lw=1, zorder=-1)
         ax.plot(ang[t_start:t_end], mag[t_start:t_end], c='red',
                 ls='--', lw=1, zorder=-1)
         ax.plot(ang[t_end:lim], mag[t_end:lim], c='dimgrey',
                 ls='--', lw=1, zorder=-1)
-    sc = ax.scatter(ang[:lim], mag[:lim], c=time[:lim],
+    # Plot individual points (time is color).
+    sc = ax.scatter(ang[ti_begin:lim], mag[ti_begin:lim], c=time[ti_begin:lim],
                     cmap='cividis', marker='o', s=8, zorder=1)
     cb = plt.colorbar(sc, ax=ax, orientation='vertical', fraction=0.15, pad=0.1)
     cb.set_label('Time (s)')

@@ -232,6 +232,52 @@ def plot_machine_delta_signals(data, title=False, save=False):
     return
 
 
+def plot_frequency(data, list_of_nodes, xlim=None, save=False):
+    """Plot frequency at selected nodes.
+
+    Parameters
+    ----------
+    data : DataFrame
+        Pandas DataFrame holding simulation signals.
+    list_of_nodes : list of integers
+        List of nodes to plot. First node is emphasized,
+        so the first node in the list should be the
+        short-circuit location.
+    xlim : float or None, default=None
+        Time limit of the signal display. It is
+        ignored if None.
+    save : bool, default=False
+        Indicator for saving figure to disk.
+
+    Returns
+    -------
+    Show matplotlib figure.
+    """
+    time = data['time']
+
+    fig, ax = plt.subplots(figsize=(6.5, 3.5))
+    for k, node in enumerate(list_of_nodes):
+        bus = 'BUS' + str(node)
+        if k == 0:
+            # First node is emphasized.
+            ax.plot(time, data[bus + '/Freq'], ls='-', lw=2, c='dimgrey',
+                    label=bus)
+        else:
+            ax.plot(time, data[bus + '/Freq'], ls='-', lw=1, label=bus)
+    ax.legend(loc='lower right', frameon=True, fancybox=True, fontsize=9)
+    ax.grid(which='major', axis='both')
+    ax.set_xlabel('Time (s)')
+    ax.set_ylabel('Frequency (Hz)')
+    if xlim is not None:
+        ax.set_xlim(0.4, xlim)
+    fig.tight_layout()
+    if save:
+        plt.savefig('frequency.pdf')
+    plt.show()
+
+    return
+
+
 def plot_bus_voltages_rms(data, bus, xlim=None, save=False):
     """
     Plot three-phase bus voltage RMS values.

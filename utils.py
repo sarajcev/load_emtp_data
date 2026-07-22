@@ -167,7 +167,7 @@ def plot_machine_signals(data, category, title=False, xlim=None, save=False):
     return
 
 
-def plot_machine_delta_signals(data, title=False, save=False):
+def plot_machine_delta_signals(data, title=False, lims=None, save=False):
     """
     Plot machine angles in regard to the external grid.
 
@@ -182,6 +182,9 @@ def plot_machine_delta_signals(data, title=False, save=False):
         Pandas DataFrame holding simulation signals.
     title : bool, default=False
         Figure title from key.
+    lims : tuple or None
+        A tuple with a lower and upper limit of the delta angle
+        for y-axis display or None.
     save : bool, default=False
         Indicator for saving figure to disk.
 
@@ -224,6 +227,9 @@ def plot_machine_delta_signals(data, title=False, save=False):
     ax.grid(which='major', axis='both')
     ax.set_xlabel('Time (s)')
     ax.set_ylabel('Angle difference (deg)')
+    if lims is not None:
+        b, t = lims  # bottom, top limits
+        ax.set_ylim(bottom=b, top=t)
     fig.tight_layout()
     if save:
         plt.savefig('machine_delta_signals.pdf')

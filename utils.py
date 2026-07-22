@@ -240,9 +240,7 @@ def plot_frequency(data, list_of_nodes, xlim=None, save=False):
     data : DataFrame
         Pandas DataFrame holding simulation signals.
     list_of_nodes : list of integers
-        List of nodes to plot. First node is emphasized,
-        so the first node in the list should be the
-        short-circuit location.
+        List of nodes to plot. First node is emphasized.
     xlim : float or None, default=None
         Time limit of the signal display. It is
         ignored if None.

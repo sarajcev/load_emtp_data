@@ -273,7 +273,7 @@ def plot_frequency(data, list_of_nodes, xlim=None, save=False):
     ax.set_xlabel('Time (s)')
     ax.set_ylabel('Frequency (Hz)')
     if xlim is not None:
-        ax.set_xlim(0.4, xlim)
+        ax.set_xlim(left=0, right=xlim)
     fig.tight_layout()
     if save:
         plt.savefig('frequency.pdf')
@@ -303,13 +303,14 @@ def plot_bus_voltages_rms(data, bus, xlim=None, save=False):
     Show matplotlib figure.
     """
     time = data['time'].values
+    mask = data.index[10:]
 
     fig, ax = plt.subplots(figsize=(6.5, 3.5))
     ax.set_title(f'RMS voltage at: {bus}', fontsize=10)
-    ax.plot(time, data[bus+'/Vrms_a'], ls='-', lw=1.5, label='Vrms_a')
-    ax.plot(time, data[bus+'/Vrms_b'], ls='-', lw=1.5, label='Vrms_b')
-    ax.plot(time, data[bus+'/Vrms_c'], ls='-', lw=1.5, label='Vrms_c')
-    ax.plot(time, data[bus+'/V1_mag'], ls="--", lw=1.5,
+    ax.plot(time[mask], data[bus+'/Vrms_a'][mask], ls='-', lw=1.5, label='Vrms_a')
+    ax.plot(time[mask], data[bus+'/Vrms_b'][mask], ls='-', lw=1.5, label='Vrms_b')
+    ax.plot(time[mask], data[bus+'/Vrms_c'][mask], ls='-', lw=1.5, label='Vrms_c')
+    ax.plot(time[mask], data[bus+'/V1_mag'][mask], ls="--", lw=1.5,
             c="dimgrey", label="dir. comp.")
     ax.legend(loc='lower right', frameon=True, fancybox=True, fontsize=9)
     ax.grid(which='major', axis='both')
@@ -361,6 +362,7 @@ def plot_bus_voltage(data, key, bus, t_sc=0.1, limit=None,
     """
     data = data[key]
     time = data['time'].values
+    mask = data.index[10:]
 
     dt = time[1] - time[0]
     # Time of SC start, and index points for the SC start and end.
@@ -384,10 +386,11 @@ def plot_bus_voltage(data, key, bus, t_sc=0.1, limit=None,
     ax[1].remove()
 
     # Top row subplot.
-    ax_top.plot(data['time'], data[bus + '/Vrms_a'], label='phase a')
-    ax_top.plot(data['time'], data[bus + '/Vrms_b'], label='phase b')
-    ax_top.plot(data['time'], data[bus + '/Vrms_c'], label='phase c')
-    ax_top.plot(data['time'], mag, ls='--', c='dimgrey', label='dir. comp.')
+    ax_top.plot(data['time'][mask], data[bus + '/Vrms_a'][mask], label='phase a')
+    ax_top.plot(data['time'][mask], data[bus + '/Vrms_b'][mask], label='phase b')
+    ax_top.plot(data['time'][mask], data[bus + '/Vrms_c'][mask], label='phase c')
+    ax_top.plot(data['time'][mask], mag[mask],
+                ls='--', c='dimgrey', label='dir. comp.')
     ax_top.axvspan(t_begin, limit, color='wheat', alpha=0.3)
     ax_top.legend(loc='lower right', frameon=True, fancybox=True, fontsize=9)
     ax_top.set_xlabel('Time (s)')

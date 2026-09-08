@@ -427,11 +427,13 @@ def plot_bus_voltage(data, key, bus, t_sc=0.1, limit=None,
     return
 
 
-def plot_voltages_heatmap(data, key, save=False):
+def plot_voltages_heatmap(data, key, phase='V1_mag', save=False):
     """ Bus voltages as a heatmap.
 
-    Display of a time-evolution of direct-sequence voltage magnitudes,
-    in per-unit values, for all network buses, organized as a heatmap.
+    Display of a time-evolution of voltage magnitudes,
+    in per-unit values, for all network main buses,
+    organized as a heatmap. Phase values or direct-sequence
+    voltage magnitudes can be selected for a display.
 
     Parameters
     ----------
@@ -442,6 +444,10 @@ def plot_voltages_heatmap(data, key, save=False):
         on type and location of the short-circuit. Then,
         data[key] is a pandas DataFrame with simulation signals
         for that particular case.
+    phase : str, default='V1_mag'
+        String identifying which phase will be used for plotting,
+        "Vrms_a", "Vrms_b", "Vrms_c", for the RMS voltage in phase
+        "a", "b", "c", or "V1_mag" for the direct-sequence voltage.
     save : bool, default=False
         Indicator for saving the figure to external file.
 
@@ -456,12 +462,12 @@ def plot_voltages_heatmap(data, key, save=False):
     for column in data.columns:
         if 'BUS' in column:
             bus_names.append(column)
-    signal_names = [bus for bus in bus_names if 'V1_mag' in bus]
+    signal_names = [bus for bus in bus_names if phase in bus]
     voltages = np.array([data[bus].values for bus in signal_names])
     buses = [name.split('/')[0] for name in signal_names]
 
     fig, ax = plt.subplots(figsize=(8,6))
-    ax.set_title(key, fontsize=10)
+    ax.set_title(key+':'+phase, fontsize=10)
     im = ax.imshow(
         voltages,
         aspect='auto',
@@ -474,8 +480,7 @@ def plot_voltages_heatmap(data, key, save=False):
     ax.set_xlabel('Time (s)')
     ax.grid(axis='y', which='major', linewidth=0.2)
     cbar = fig.colorbar(im, ax=ax)
-    cbar.set_label('Direct-sequence voltage magnitude (pu)',
-                   fontsize=9)
+    cbar.set_label('Voltage magnitude (pu)', fontsize=10)
     fig.tight_layout()
     if save:
         plt.savefig(key+'-heatmap' + '.pdf')

@@ -1,4 +1,5 @@
-import matplotlib.pylab as plt
+import numpy as np
+import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 
 
@@ -421,6 +422,63 @@ def plot_bus_voltage(data, key, bus, t_sc=0.1, limit=None,
 
     if save:
         plt.savefig(key + ':' + bus + '.pdf')
+    plt.show()
+
+    return
+
+
+def plot_voltages_heatmap(data, key, save=False):
+    """ Bus voltages as a heatmap.
+
+    Display of a time-evolution of direct-sequence voltage magnitudes,
+    in per-unit values, for all network buses, organized as a heatmap.
+
+    Parameters
+    ----------
+    data : DataFrame
+        Pandas DataFrame holding simulation signals.
+    key : str
+        String identifying dictionary key with information
+        on type and location of the short-circuit. Then,
+        data[key] is a pandas DataFrame with simulation signals
+        for that particular case.
+    save : bool, default=False
+        Indicator for saving the figure to external file.
+
+    Returns
+    -------
+    Maplotlib plot with a heatmap display of bus voltages.
+    """
+    data = data[key]
+    time = data['time'].values
+
+    bus_names = []
+    for column in data.columns:
+        if 'BUS' in column:
+            bus_names.append(column)
+    signal_names = [bus for bus in bus_names if 'V1_mag' in bus]
+    voltages = np.array([data[bus].values for bus in signal_names])
+    buses = [name.split('/')[0] for name in signal_names]
+
+    fig, ax = plt.subplots(figsize=(8,6))
+    ax.set_title(key, fontsize=10)
+    im = ax.imshow(
+        voltages,
+        aspect='auto',
+        origin='lower',
+        extent=(time[0], time[-1], 0, voltages.shape[0]-1),
+        cmap='viridis',
+    )
+    ax.set_yticks(np.arange(len(buses)))
+    ax.set_yticklabels(buses, fontsize=8)
+    ax.set_xlabel('Time (s)')
+    ax.grid(axis='y', which='major', linewidth=0.2)
+    cbar = fig.colorbar(im, ax=ax)
+    cbar.set_label('Direct-sequence voltage magnitude (pu)',
+                   fontsize=9)
+    fig.tight_layout()
+    if save:
+        plt.savefig(key+'-heatmap' + '.pdf')
     plt.show()
 
     return

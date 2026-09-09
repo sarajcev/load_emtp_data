@@ -427,7 +427,7 @@ def plot_bus_voltage(data, key, bus, t_sc=0.1, limit=None,
     return
 
 
-def plot_voltages_heatmap(data, key, phase='V1_mag', save=False):
+def plot_voltages_heatmap(data, key, phase='V1_mag', limit=None, save=False):
     """ Bus voltages as a heatmap.
 
     Display of a time-evolution of voltage magnitudes,
@@ -448,6 +448,8 @@ def plot_voltages_heatmap(data, key, phase='V1_mag', save=False):
         String identifying which phase will be used for plotting,
         "Vrms_a", "Vrms_b", "Vrms_c", for the RMS voltage in phase
         "a", "b", "c", or "V1_mag" for the direct-sequence voltage.
+    limit : float or None, default=None
+        Time limit of the voltage display in seconds.
     save : bool, default=False
         Indicator for saving the figure to external file.
 
@@ -458,30 +460,36 @@ def plot_voltages_heatmap(data, key, phase='V1_mag', save=False):
     data = data[key]
     time = data['time'].values
 
+    if limit is None:
+        lim = -1
+    else:
+        # Index of the time limit for plotting.
+        dt = time[1] - time[0]
+        lim = int(limit/dt) + 1
+
     bus_names = []
     for column in data.columns:
         if 'BUS' in column:
             bus_names.append(column)
     signal_names = [bus for bus in bus_names if phase in bus]
-    voltages = np.array([data[bus].values for bus in signal_names])
+    voltages = np.asarray([data[bus].values for bus in signal_names])
     buses = [name.split('/')[0] for name in signal_names]
 
-    fig, ax = plt.subplots(figsize=(8,6))
+    fig, ax = plt.subplots(figsize=(6.8, 5.5), constrained_layout=True)
     ax.set_title(key+':'+phase, fontsize=10)
     im = ax.imshow(
-        voltages,
+        voltages[:, :lim],
         aspect='auto',
         origin='lower',
-        extent=(time[0], time[-1], 0, voltages.shape[0]-1),
+        extent=(time[0], time[lim], 0, voltages.shape[0]-1),
         cmap='viridis',
     )
     ax.set_yticks(np.arange(len(buses)))
     ax.set_yticklabels(buses, fontsize=8)
     ax.set_xlabel('Time (s)')
     ax.grid(axis='y', which='major', linewidth=0.2)
-    cbar = fig.colorbar(im, ax=ax)
-    cbar.set_label('Voltage magnitude (pu)', fontsize=10)
-    fig.tight_layout()
+    cbar = fig.colorbar(im, ax=ax, pad=0.01)
+    cbar.set_label('RMS voltage magnitude (pu)')
     if save:
         plt.savefig(key+'-heatmap' + '.pdf')
     plt.show()

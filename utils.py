@@ -113,6 +113,54 @@ def create_white_list(varnames, exclude, buses, variant):
     return white_list
 
 
+def filter_signal(signal, filter_type='median', window=21):
+    """
+    Filter the time-domain signal.
+
+    A two-step signal filtering. First a moving average or
+    a moving median filter is applied to the raw data. Then,
+    a Savitzky-Golay filter is applied on top of the filtered
+    data (using the same window size) to further smooth the
+    final output signal.
+
+    Parameters
+    ----------
+    signal : array-like
+        Array (1D) holding the raw signal data points.
+    filter_type : str, default='median'
+        A type of filter to apply, either `mean` or `median`.
+    window : int, default=21
+        Window length in sample points for the filter.
+
+    Returns
+    -------
+    yhat : array
+        Array holding the filtered signal data points. It
+        has the same dimension as the original 1D array.
+    """
+    from scipy.ndimage import uniform_filter1d as mean_filter
+    from scipy.signal import medfilt as median_filter
+    from scipy.signal import savgol_filter
+
+    # Filter's window length uses an odd number of sample points.
+    if window % 2 == 0:
+        window += 1
+
+    if filter_type == 'median':
+        # Moving median filter.
+        sf = median_filter(signal, kernel_size=window)
+    elif filter_type == 'mean':
+        # Moving average (MA) filter.
+        sf = mean_filter(signal, size=window)
+    else:
+        raise NotImplementedError(f'Filter type: {filter_type} is not recognized.')
+
+    # Smooth the resulting signal with a Savitzky-Golay filter.
+    yhat = savgol_filter(sf, window_length=window, polyorder=3)
+
+    return yhat
+
+
 def plot_machine_signals(data, category, title=False, xlim=None, save=False):
     """
     Plot EMTP-RV simulation signals for the machines.
@@ -239,7 +287,8 @@ def plot_machine_delta_signals(data, title=False, lims=None, save=False):
     return
 
 
-def plot_frequency(data, list_of_nodes, xlim=None, save=False):
+def plot_frequency(data, list_of_nodes, raw=True, xlim=None,
+                   save=False, **kwargs):
     """Plot frequency at selected nodes.
 
     Parameters
@@ -251,8 +300,15 @@ def plot_frequency(data, list_of_nodes, xlim=None, save=False):
     xlim : float or None, default=None
         Time limit of the signal display. It is
         ignored if None.
+    raw : bool, default=True
+        Indicator for filtering the signal. If raw=True,
+        original raw signal is plotted; otherwise, if
+        raw=False, filtered signal is plotted.
     save : bool, default=False
         Indicator for saving figure to disk.
+    **kwargs : dict
+        Dictionary of keyword arguments for filtering
+        signal.
 
     Returns
     -------
@@ -263,13 +319,19 @@ def plot_frequency(data, list_of_nodes, xlim=None, save=False):
     fig, ax = plt.subplots(figsize=(6.5, 3.5))
     for k, node in enumerate(list_of_nodes):
         bus = 'BUS' + str(node)
+        if raw:
+            # Use original data.
+            signal = data[bus + '/Freq'].values
+        else:
+            # Filter signal.
+            signal = filter_signal(data[bus + '/Freq'].values, **kwargs)
         if k == 0:
             # First node is emphasized.
-            ax.plot(time, data[bus + '/Freq'], ls='-', lw=2, c='dimgrey',
+            ax.plot(time, signal, ls='-', lw=2, c='dimgrey',
                     label=bus)
         else:
-            ax.plot(time, data[bus + '/Freq'], ls='-', lw=1, label=bus)
-    ax.legend(loc='lower right', frameon=True, fancybox=True, fontsize=9)
+            ax.plot(time, signal, ls='-', lw=1, label=bus)
+    ax.legend(loc='best', frameon=True, fancybox=True, fontsize=9)
     ax.grid(which='major', axis='both')
     ax.set_xlabel('Time (s)')
     ax.set_ylabel('Frequency (Hz)')

@@ -369,7 +369,7 @@ def plot_bus_voltages_rms(data, bus, xlim=None, save=False):
     mask = data.index[10:]
 
     fig, ax = plt.subplots(figsize=(6.5, 3.5))
-    ax.set_title(f'RMS voltage at: {bus}', fontsize=10)
+    #ax.set_title(f'RMS voltage at: {bus}', fontsize=10)
     ax.plot(time[mask], data[bus+'/Vrms_a'][mask], ls='-', lw=1.5, label='Vrms_a')
     ax.plot(time[mask], data[bus+'/Vrms_b'][mask], ls='-', lw=1.5, label='Vrms_b')
     ax.plot(time[mask], data[bus+'/Vrms_c'][mask], ls='-', lw=1.5, label='Vrms_c')
@@ -481,6 +481,7 @@ def plot_bus_voltage(data, key, bus, t_sc=0.1, limit=None,
                     cmap='cividis', marker='o', s=8, zorder=1)
     cb = plt.colorbar(sc, ax=ax, orientation='vertical', fraction=0.15, pad=0.1)
     cb.set_label('Time (s)')
+    fig.tight_layout()
 
     if save:
         plt.savefig(key + ':' + bus + '.pdf')
@@ -538,7 +539,7 @@ def plot_voltages_heatmap(data, key, phase='V1_mag', limit=None, save=False):
     buses = [name.split('/')[0] for name in signal_names]
 
     fig, ax = plt.subplots(figsize=(6.8, 5.5), constrained_layout=True)
-    ax.set_title(key+':'+phase, fontsize=10)
+    #ax.set_title(key+':'+phase, fontsize=10)
     im = ax.imshow(
         voltages[:, :lim],
         aspect='auto',

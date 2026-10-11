@@ -79,6 +79,14 @@ indicator from 0 to 1. When two PV plants are present, the second
 one is prefixed with PV2; the same is for wind farms, where the
 second one is then prefixed by WF2.
 
+BUS signals variable names:
+    '/Vrms_a'    # RMS voltage in phase a (p.u.)
+    '/Vrms_b'    # RMS voltage in phase b (p.u.)
+    '/Vrms_c'    # RMS voltage in phase c (p.u.)
+    '/V1_mag'    # positive-sequence voltage magnitude (p.u.)
+    '/V1_phase'  # positive-sequence voltage phase angle (deg)
+    '/Freq'      # frequency of voltage (Hz)
+
 PowerPlant signals variable names:
     '/Teta_1_SM1',   # rotor angle (deg)
     '/Omega_1_SM1',  # rotor speed
@@ -93,9 +101,9 @@ PowerPlant signals variable names:
 WindFarm (WF) signals variable names:
     '/P'   # active power (W)
     '/Q'   # reactive power (VAR)
-    '/V0', 'WF/I0'  # zero sequence voltage & current (V, A)
-    '/V1', 'WF/I1'  # direct sequence voltage & current (V, A)
-    '/V2', 'WF/I2'  # inverse sequence voltage & current (V, A)
+    '/V0', 'WF/I0'  # zero-sequence voltage & current (V, A)
+    '/V1', 'WF/I1'  # positive-sequence voltage & current (V, A)
+    '/V2', 'WF/I2'  # negative-sequence voltage & current (V, A)
     '/PMSG_T_rotor'  # aggregated wind turbines torque
     '/PMSG_w_rotor'  # aggregated wind turbines speed
     '/FRT_flag'      # wind farm FRT indicator
@@ -103,17 +111,10 @@ WindFarm (WF) signals variable names:
 PVPlant (PV) signals variable names:
     '/P'   # active power (W)
     '/Q'   # reactive power (VAR)
-    '/V0', 'PV/I0'  # zero sequence voltage & current (V, A)
-    '/V1', 'PV/I1'  # direct sequence voltage & current (V, A)
-    '/V2', 'PV/I2'  # inverse sequence voltage & current (V, A)
+    '/V0', 'PV/I0'  # zero-sequence voltage & current (V, A)
+    '/V1', 'PV/I1'  # positive-sequence voltage & current (V, A)
+    '/V2', 'PV/I2'  # negative-sequence voltage & current (V, A)
     '/FRT_flag'     # PV plant FRT indicator
-
-BUS signals variable names:
-    '/Vrms_a'    # RMS voltage in phase a (p.u.)
-    '/Vrms_b'    # RMS voltage in phase b (p.u.)
-    '/Vrms_c'    # RMS voltage in phase c (p.u.)
-    '/V1_mag'    # direct seq. voltage magnitude (p.u.)
-    '/V1_phase'  # direct seq. voltage phase angle (deg)
 
 Authors:
     Ivica Juric-Grgic, Ivan Krolo, Dino Lovric, Petar Sarajcev
@@ -121,5 +122,5 @@ Authors:
     R. Boskovica 32, HR-21000 Split, Croatia.
     Corresponding author: petar.sarajcev@fesb.hr
 
-License: CC-BY
+License: Creative Commons Attribution 4.0 (CC BY).
 """

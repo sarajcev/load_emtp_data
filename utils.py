@@ -1,6 +1,24 @@
+import pickle
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
-from matplotlib.gridspec import GridSpec
+
+from sklearn.ensemble import ExtraTreesClassifier
+from sklearn.calibration import CalibratedClassifierCV
+from sklearn.model_selection import (
+    RandomizedSearchCV,
+    StratifiedKFold,
+    cross_val_score,
+)
+from sklearn.metrics import (
+    classification_report,
+    confusion_matrix,
+    balanced_accuracy_score,
+    roc_auc_score,
+    average_precision_score,
+    precision_recall_curve,
+    auc,
+)
 
 
 def create_white_list(varnames, exclude, buses, variant):
@@ -202,7 +220,7 @@ def plot_machine_signals(data, category, title=False, xlim=None, save=False):
         if category in name:
             signal = data[name].values
             ax.plot(time, signal, ls='-', lw=1.5, label=name.split('/')[0])
-    ax.legend(loc='upper right', frameon=True, fancybox=True, fontsize=8)
+    ax.legend(loc='best', frameon=True, fancybox=True, fontsize=8)
     ax.grid(which='major', axis='both')
     ax.set_xlabel('Time (s)')
     ax.set_ylabel(category)
@@ -272,7 +290,7 @@ def plot_machine_delta_signals(data, title=False, lims=None, save=False):
                 delta_signal = slack_signal - signal
                 ax.plot(time, delta_signal, ls='-', lw=1.5,
                         label=name.split('/')[0])
-    ax.legend(loc='upper right', frameon=True, fancybox=True, fontsize=8)
+    ax.legend(loc='best', frameon=True, fancybox=True, fontsize=8)
     ax.grid(which='major', axis='both')
     ax.set_xlabel('Time (s)')
     ax.set_ylabel('Angle difference (deg)')
@@ -345,7 +363,7 @@ def plot_frequency(data, list_of_nodes, raw=True, xlim=None,
     return
 
 
-def plot_bus_voltages_rms(data, bus, xlim=None, save=False):
+def plot_bus_voltages_rms(data, bus, xlim=None, title=False, save=False):
     """
     Plot three-phase bus voltage RMS values.
 
@@ -358,6 +376,8 @@ def plot_bus_voltages_rms(data, bus, xlim=None, save=False):
     xlim : float or None, default=None
         Time limit of the signal display. It is
         ignored if None.
+    title : bool, default=False
+        Indicator for showing plot title.
     save : bool, default=False
         Indicator for saving figure to disk.
 
@@ -369,7 +389,8 @@ def plot_bus_voltages_rms(data, bus, xlim=None, save=False):
     mask = data.index[10:]
 
     fig, ax = plt.subplots(figsize=(6.5, 3.5))
-    #ax.set_title(f'RMS voltage at: {bus}', fontsize=10)
+    if title:
+        ax.set_title(f'RMS voltage at: {bus}', fontsize=9)
     ax.plot(time[mask], data[bus+'/Vrms_a'][mask], ls='-', lw=1.5, label='Vrms_a')
     ax.plot(time[mask], data[bus+'/Vrms_b'][mask], ls='-', lw=1.5, label='Vrms_b')
     ax.plot(time[mask], data[bus+'/Vrms_c'][mask], ls='-', lw=1.5, label='Vrms_c')
@@ -560,53 +581,6 @@ def plot_voltages_heatmap(data, key, phase='V1_mag', limit=None, save=False):
     return
 
 
-def tsi_from_angle(data, tol=60):
-    """
-    Transient Stability Index (TSI) for the simulation.
-
-    TSI is obtained from the machine swing angles,
-    in regard to the reference machine angle (i.e. machine
-    G1 which serves as an extenal system). If any of the
-    machines in the system is unstable, then TSI = 1;
-    otherwise, if all machines are stable then TSI = 0.
-
-    Parameters
-    ----------
-    data : DataFrame
-        Pandas DataFrame holding simulation signals.
-    tol : float, default=60
-        Tolerance for signal detection in degrees.
-
-    Returns
-    -------
-    tsi : int
-        TSI value: 0 - stable case, 1 - unstable case.
-    """
-    # Machine's swing angle in regard to the reference,
-    # which is represented by the machine G1 (external system).
-    slack_signal = data['PowerPlant_01/Teta_1_SM1'].values
-    tsi = 0
-    for name in data.columns:
-        if 'Teta' in name:
-            signal = data[name].values
-            pp = name.split('/')[0][-2:]
-            if pp == '01':
-                # This is the external system, skip it.
-                continue
-            else:
-                # Difference in the swing from the reference.
-                delta_signal = slack_signal - signal
-                # Absolute difference between the first and last point
-                # of the swing difference.
-                dd = abs(delta_signal[0] - delta_signal[-1])
-                if dd > tol:
-                    # If this difference is larger than the prescribed
-                    # tolerance, then the swing is considered unstable.
-                    tsi = 1
-                    break
-    return tsi
-
-
 def plot_machine_multi_figure(data, key, plant, save=False):
     """
     Plot machine signals with multiple subplots.
@@ -631,6 +605,8 @@ def plot_machine_multi_figure(data, key, plant, save=False):
     -------
     Shows a matplotlib figure.
     """
+    from matplotlib.gridspec import GridSpec
+
     data = data[key]
     tsi = 0
     fig = plt.figure(figsize=(6.5, 6), layout='constrained')
@@ -709,6 +685,8 @@ def plot_ren_multi_figure(data, key, plant, save=False):
     -------
     Shows a matplotlib figure.
     """
+    from matplotlib.gridspec import GridSpec
+
     data = data[key]
     fig = plt.figure(figsize=(6.5, 5), layout='constrained')
     gs = GridSpec(nrows=3, ncols=3, figure=fig, height_ratios=[2, 2, 1])
@@ -754,3 +732,484 @@ def plot_ren_multi_figure(data, key, plant, save=False):
     plt.show()
 
     return
+
+
+def tsi_from_angle(data, tol=60):
+    """
+    Transient Stability Index (TSI) for the simulation.
+
+    TSI is obtained from the machine swing angles,
+    in regard to the reference machine angle (i.e. machine
+    G1 which serves as an extenal system). If any of the
+    machines in the system is unstable, then TSI = 1;
+    otherwise, if all machines are stable then TSI = 0.
+
+    Parameters
+    ----------
+    data : DataFrame
+        Pandas DataFrame holding simulation signals.
+    tol : float, default=60
+        Tolerance for signal detection in degrees.
+
+    Returns
+    -------
+    tsi : int
+        TSI value: 0 - stable case, 1 - unstable case.
+    """
+    # Machine's swing angle in regard to the reference,
+    # which is represented by the machine G1 (external system).
+    slack_signal = data['PowerPlant_01/Teta_1_SM1'].values
+    tsi = 0
+    for name in data.columns:
+        if 'Teta' in name:
+            signal = data[name].values
+            pp = name.split('/')[0][-2:]
+            if pp == '01':
+                # This is the external system, skip it.
+                continue
+            else:
+                # Difference in the swing from the reference.
+                delta_signal = slack_signal - signal
+                # Absolute difference between the first and last point
+                # of the swing difference.
+                dd = abs(delta_signal[0] - delta_signal[-1])
+                if dd > tol:
+                    # If this difference is larger than the prescribed
+                    # tolerance, then the swing is considered unstable.
+                    tsi = 1
+                    break
+    return tsi
+
+
+def frt_stability(data, THR=1000):
+    """
+    Transient stability from the FRT signal.
+
+    If any FRT signal has value 1 persistently it is considered
+    that power plant is unstable. A cumulative sum of FRT signal
+    values is computed and compared aginst a threshold (THR). If
+    it exceeds the threshold that indicates unstable power plant
+    operation and a global FRT stability flag of 1 is returned.
+    Otherwise, if the cumulative sum does not exceed the threshold,
+    power plant is considered stable and a global FRT stability
+    index of 0 is returned. All RES power plants are tested, and
+    it is sufficient that only one of them is unstable for the
+    global FRT stability index to become 1. If there is no RES,
+    then global FRT stability index will be 0.
+
+    Parameters
+    ----------
+    data : DataFrame
+        Pandas DataFrame holding simulation signals.
+    THR : ind, default=1000
+        Threshold for FRT stability.
+    Returns
+    -------
+    frt : int
+        Stability index: 0 - stable case; 1 - unstable case
+    """
+    frt = 0
+    for name in data.columns:
+        if 'FRT' in name:
+            signal = data[name].values
+            # If FRT flag is persistent for a long time.
+            if signal.sum() >= THR:
+                # Unstable case.
+                frt = 1
+                break
+
+    return frt
+
+
+def features_engineering(path):
+    """
+    Engineer features from the voltage signals and targets
+    from the transient stability index (TSI) analysis, where
+    TSI is determined from rotor angle deviations.
+
+    Parameters
+    ----------
+    path : pathlib.Path
+        A pathlib constructed directory path where the pickle file is
+        stored, including the name of that file. A pickle file stores
+        the simulation data for a single variant.
+
+    Returns
+    -------
+    features_targets : pd.DataFrame
+        Features and targets for a single variant.
+    """
+    with open(file=path, mode='rb') as fp:
+        data_all = pickle.load(fp)
+
+    # Extract SC duration.
+    file = str(path).split('/')[-1]
+    sc_duration = file.split('-')[1][1:4]
+
+    selected_keys = []
+    if sc_duration == '100':
+        # Extract all data.
+        selected_keys = [key for key in data_all.keys() if key != 'README']
+    elif sc_duration == '300':
+        # Extract data for middle-points only. We don't consider
+        # main bus faults lasting 300 ms, as these are too severe.
+        middle_points = [f'BUS{point}' for point in range(40, 73)]
+        for key in data_all.keys():
+            if key == 'README':
+                continue
+            _, bus = key.split('-')
+            if bus in middle_points:
+                selected_keys.append(key)
+    else:
+        raise ValueError()
+
+    # Engineer features and targets.
+    features = {}
+    targets = {}
+    for key in selected_keys:
+        data = data_all[key]
+        features[key] = []
+        for col in data.columns:
+            if 'V1_mag' in col and 'BUS39' not in col:
+                signal = data[col]
+                # Voltage drop (onset time).
+                v1 = signal.loc[data['time'] == 0.540].values[0].round(3)
+                # Voltage recovery (clearing time).
+                if sc_duration == '100':
+                    v2 = signal.loc[data['time'] == 0.640].values[0].round(3)
+                elif sc_duration == '300':
+                    v2 = signal.loc[data['time'] == 0.840].values[0].round(3)
+                else:
+                    raise ValueError()
+                # Add scenario features.
+                features[key].extend([v1, v2])
+        # Add short-circuit duration as a feature.
+        #features[key].append(float(sc_duration) / 1000.)  # seconds
+
+        # TSI analysis.
+        tsi = tsi_from_angle(data)
+        # FRT analysis.
+        frt = frt_stability(data)
+        # TSI OR FRT.
+        stability = np.logical_or(tsi, frt)
+        # Assign targets.
+        targets[key] = stability
+
+    # DataFrame with features and targets.
+    features_targets = pd.DataFrame.from_dict(features, orient='index')
+    size = len(features_targets.columns)
+    # Rename features columns.
+    features_targets.columns = [f'F{i+1}' for i in range(size)]
+    # Add targets column.
+    features_targets['TSI'] = pd.Series(targets)
+
+    return features_targets
+
+
+def train_extra_trees_classifier(
+    df,
+    n_iter=100,
+    cv=3,
+    scoring='balanced_accuracy',
+    random_state=42,
+    n_jobs=-1,
+):
+    """
+    Train an Extra Trees binary classifier with class-weight balancing.
+
+    The last DataFrame column is treated as the target; all preceding columns
+    are treated as features.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame holding features and targets (as a last column).
+    n_iter : int, default=100
+        Number of iterations for the RandomSearch used for
+        hyperparameters tuning.
+    cv : int, default=3
+        Number of folds for the k-fold stratified cross-validation.
+    scoring : str, default='balanced_accuracy'
+        String that defines sklearn scoring metric.
+    random_state : int, default=42
+        Random seed used during classifier training, both for the
+        stratified k-fold and random search.
+    n_jobs : int, default=-1
+        Number of cores for parallel processing. Default value
+        uses all cores.
+
+    Returns
+    -------
+    ExtraTreesClassifier
+        The best fitted classifier from the randomized search.
+    """
+    from scipy.stats import randint
+
+    X = df.iloc[:, :-1]
+    y = df.iloc[:, -1]
+
+    classifier = ExtraTreesClassifier(
+        class_weight='balanced',
+        random_state=random_state,
+        n_jobs=n_jobs,
+    )
+
+    param_distributions = {
+        'n_estimators': randint(200, 1000),
+        'max_depth': [None, 5, 10, 20, 30, 50],
+        'min_samples_split': randint(2, 20),
+        'min_samples_leaf': randint(1, 10),
+        'max_features': ['sqrt', 'log2', None, 0.5, 0.75, 1.0],
+        'criterion': ['gini', 'entropy', 'log_loss'],
+        'bootstrap': [False, True],
+    }
+
+    cv_strategy = StratifiedKFold(n_splits=cv, shuffle=True,
+                                  random_state=random_state)
+
+    search = RandomizedSearchCV(
+        estimator=classifier,
+        param_distributions=param_distributions,
+        n_iter=n_iter,
+        scoring=scoring,
+        cv=cv_strategy,
+        refit=True,
+        random_state=random_state,
+        n_jobs=n_jobs,
+        verbose=1,
+    )
+
+    search.fit(X, y)
+
+    return search.best_estimator_
+
+
+def calibrate_model(base_model, df):
+    """
+    Calibrate binary classification model.
+
+    Parameters
+    ----------
+    base_model : sklearn model
+        Base model instance.
+    df : pd.DataFrame
+        DataFrame holding calibration set.
+
+    Returns
+    -------
+    model : sklearn model
+        Calibrated sklearn model instance.
+    """
+    X = df.iloc[:, :-1]
+    y = df.iloc[:, -1]
+
+    calibrated_model = CalibratedClassifierCV(
+        estimator=base_model,
+        method='sigmoid',
+        cv=3
+    )
+    calibrated_model.fit(X, y)
+
+    return calibrated_model
+
+
+def tune_model_threshold(model, df, scoring='roc_auc'):
+    """
+    Tune the classifier threshold on a validation set.
+
+    Parameters
+    ----------
+    model : sklearn model
+        Base model instance.
+    df : pd.DataFrame
+        DataFrame holding calibration set, where last column
+        holds targets.
+    scoring : str, default='roc_auc'
+        String for the sklearn scoring metric.
+
+    Returns
+    -------
+    threshold : float
+        Best model threshold from the validation set.
+    """
+    from sklearn.model_selection import TunedThresholdClassifierCV
+
+    X = df.iloc[:, :-1]
+    y = df.iloc[:, -1]
+
+    tuned_clf = TunedThresholdClassifierCV(
+        model,
+        scoring=scoring,
+        response_method='predict_proba',
+        n_jobs=-1
+    )
+    tuned_clf.fit(X, y)
+
+    return tuned_clf.best_threshold_
+
+
+def corrupt_measurements(data, bus, no_samples):
+    """ Corrupting data measurements.
+
+    Simulating random malfunctioning PMU units.
+
+    Parameters
+    ----------
+    data : pd.DataFrame
+        DataFrame containing data features.
+    bus : int
+        Integer bus number.
+    no_samples : int
+        Number of samples to simulate.
+
+    Returns
+    -------
+    data : pd.DataFrame
+        DataFrame containing corrupted data.
+    """
+    # Simulating measurement errors.
+    ids_rand = data.sample(n=no_samples, replace=False).index
+    f1, f2 = f'F{2*bus-1}', f'F{2*bus}'  # locate features
+    # Replace selected measurement (features) with NaN values.
+    data.loc[ids_rand, [f1, f2]] = None
+
+    return data
+
+
+def precision_recall_tradeoff(thresholds, precision, recall, save_fig=False):
+    """
+    Plot precision-recall tradeoff curves.
+
+    Plot a precision and recall curves of the binary classifier,
+    as a function of the decision-making threshold values.
+
+    Parameters
+    ----------
+    thresholds : array
+        Array holding threshold levels.
+    precision : array
+        Array holding classifier precisions at threshold levels.
+    recall : array
+        Array holding classifier recalls at threshold levels.
+    save_fig: bool, default=False
+        Indicator for saving the figure as external file.
+
+    Returns
+    -------
+    Display matplotlib figure.
+    """
+    fig, ax = plt.subplots(figsize=(5, 3))
+    ax.plot(thresholds, precision[:-1], lw=2, label='Precision')
+    ax.plot(thresholds, recall[:-1], lw=2, label='Recall')
+    ax.set_xlabel('Decision thresholds')
+    ax.set_ylabel('Precision / Recall')
+    ax.legend(loc='lower right')
+    ax.set_ylim(ymin=0.1)
+    ax.grid(which='major', axis='both')
+    fig.tight_layout()
+    if save_fig:
+        fig.savefig('precis-recall.pdf')
+    plt.show()
+
+
+def roc_curve(y_true, y_score, save_fig=False):
+    """
+    Plot Receiver Operating Characteritic (ROC).
+
+    Parameters
+    ----------
+    y_true : array
+        Array holding true labels.
+    y_score : array
+        Array holding probability estimates of the positive class.
+    save_fig : bool, default=False
+        A flag for saving figure to disk (True/False).
+
+    Returns
+    -------
+    Matplotlib figure.
+    """
+    from sklearn.metrics import RocCurveDisplay
+
+    fig, ax = plt.subplots(figsize=(5, 5))
+    RocCurveDisplay.from_predictions(y_true, y_score, pos_label=1, ax=ax)
+    ax.grid(which='major', axis='both')
+    fig.tight_layout()
+    if save_fig:
+        plt.savefig('roc_curve.pdf')
+    plt.show()
+
+
+def evaluate_extra_trees_classifier(model, test_df, thr=None, **kwargs):
+    """
+    Compare model predictions with true labels in test_df.
+
+    Assumes the last column of test_df is the target and all preceding columns
+    are features.
+
+    Parameters
+    ----------
+    model : sklearn
+        Trained model instance.
+    test_df : pd.DataFrame
+        Dataframe holding features and targets (as a last column).
+    thr : floar or None, default=None
+        Threshold of the classifier for making predictions.
+    **kwargs : dict
+        Additional keyword arguments packed in a dictionary.
+
+    Returns
+    -------
+    Evaluation metrics.
+        Function plots precision-recall curve, prints confusion matrix,
+        classification report, ROC AUC, PR AUC, balanced accuracy,
+        and returns a DataFrame with row-level comparison for further
+        inspection.
+    """
+    X_test = test_df.iloc[:, :-1]
+    y_test = test_df.iloc[:, -1]
+
+    # Model predictions.
+    probabilities = model.predict_proba(X_test)[:, 1]
+    if thr is None:
+        predictions = model.predict(X_test)
+    else:
+        predictions = (probabilities >= thr).astype(int)
+
+    # Average precision.
+    pr_auc_average = average_precision_score(y_test, probabilities)
+
+    # Precision, recall, and thresholds.
+    precision, recall, thresholds = precision_recall_curve(y_test, probabilities)
+    # Plot precision-recall curves.
+    precision_recall_tradeoff(thresholds, precision, recall, **kwargs)
+    # Area under the precision-recall curve.
+    pr_auc = auc(recall, precision)
+
+    # Receiver operating characteristic (ROC).
+    #roc_curve(y_test, probabilities)
+
+    print('Confusion matrix:')
+    print(confusion_matrix(y_test, predictions, labels=[0, 1]))
+
+    print('\nClassification report:')
+    print(classification_report(y_test, predictions, digits=3,
+                                zero_division=0.0))
+
+    print(f'Balanced accuracy: {balanced_accuracy_score(y_test, predictions):.4f}')
+    print(f'ROC AUC: {roc_auc_score(y_test, probabilities):.4f}')
+    print(f'PR AUC (average precision): {pr_auc_average:.4f}')
+    print(f'PR AUC: {pr_auc:.4f}')
+
+    # Cross-validated ROC AUC score.
+    roc_auc = cross_val_score(model, X_test, y_test, scoring='roc_auc',
+                              cv=3, n_jobs=-1)
+    print(f'ROC AUC (3-fold CV) Score: {roc_auc.mean():.4f} +/- {roc_auc.std():.4f}')
+
+    # Return row-level comparison for further inspection.
+    comparison = test_df.copy()
+    comparison['predicted'] = predictions
+    comparison['prob_class_1'] = probabilities
+    comparison['is_correct'] = predictions == y_test.to_numpy()
+
+    return comparison

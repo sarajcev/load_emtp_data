@@ -80,7 +80,7 @@ def create_white_list(varnames, exclude, buses, variant):
         )
     
     # Renewables connected to the power system?
-    if variant in ['V1', 'V2', 'V3', 'V4']:
+    if variant in ['V1', 'V2', 'V3', 'V4', 'V5']:
         # Wind farm signals (DEV2). 
         # This WF replaces machine G8.
         white_list.extend(['DEV2/P', 'DEV2/Q'])
@@ -98,7 +98,7 @@ def create_white_list(varnames, exclude, buses, variant):
             'WECC_PVPark_1/Converter_control/Control/GridControl_DLL/FRT_flag'
         )
     
-    if variant in ['V2', 'V3', 'V4']:
+    if variant in ['V2', 'V3', 'V4', 'V5']:
         # These are variants with 40% share of renewables.
         # Wind farm 2 (WF2) signals (DEV4).
         # This WF replaces machine G9.
@@ -117,7 +117,7 @@ def create_white_list(varnames, exclude, buses, variant):
             'WECC_PVPark_2/Converter_control/Control/GridControl_DLL/FRT_flag'
         )
     
-    if variant in ['V4']:
+    if variant in ['V4', 'V5']:
         # This is a variant with 60% share of renewables.
         # PV plant 3 (PV3) signals (DEV6).
         # This PV replaces machine G10.
@@ -127,7 +127,24 @@ def create_white_list(varnames, exclude, buses, variant):
         white_list.append(
             'WECC_PVPark_3/Converter_control/Control/GridControl_DLL/FRT_flag'
         )
-    
+
+    if variant == 'V5':
+        # This is a variant with 80% share of renewables.
+        # PV plant 4 (PV4) signals (DEV7).
+        white_list.extend(['DEV7/P', 'DEV7/Q'])
+        white_list.extend(['DEV7/V0', 'DEV7/V1', 'DEV7/V2'])
+        white_list.extend(['DEV7/I0', 'DEV7/I1', 'DEV7/I2'])
+        white_list.append(
+            'WECC_PVPark_4/Converter_control/Control/GridControl_DLL/FRT_flag'
+        )
+        # Wind farm 3 (WF3) signals (DEV8).
+        white_list.extend(['DEV8/P', 'DEV8/Q'])
+        white_list.extend(['DEV8/V0', 'DEV8/V1', 'DEV8/V2'])
+        white_list.extend(['DEV8/I0', 'DEV8/I1', 'DEV8/I2'])
+        white_list.append('FFC_WP3/Wind_Turbine/PMSG_T_rotor')
+        white_list.append('FFC_WP3/Wind_Turbine/PMSG_w_rotor')
+        white_list.append('FFC_WP3/Converter_control/Control/Grid_Ctrl/FRT_flag')
+
     return white_list
 
 

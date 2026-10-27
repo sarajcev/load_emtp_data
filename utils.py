@@ -3,7 +3,11 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from sklearn.ensemble import ExtraTreesClassifier
+from sklearn.ensemble import (
+    ExtraTreesClassifier,
+    HistGradientBoostingClassifier,
+    RandomForestClassifier,
+)
 from sklearn.calibration import CalibratedClassifierCV
 from sklearn.model_selection import (
     RandomizedSearchCV,
@@ -970,7 +974,6 @@ def train_extra_trees_classifier(
         random_state=random_state,
         n_jobs=n_jobs,
     )
-
     param_distributions = {
         'n_estimators': randint(200, 1000),
         'max_depth': [None, 5, 10, 20, 30, 50],
@@ -980,10 +983,11 @@ def train_extra_trees_classifier(
         'criterion': ['gini', 'entropy', 'log_loss'],
         'bootstrap': [False, True],
     }
-
-    cv_strategy = StratifiedKFold(n_splits=cv, shuffle=True,
-                                  random_state=random_state)
-
+    cv_strategy = StratifiedKFold(
+        n_splits=cv,
+        shuffle=True,
+        random_state=random_state,
+    )
     search = RandomizedSearchCV(
         estimator=classifier,
         param_distributions=param_distributions,
@@ -995,7 +999,122 @@ def train_extra_trees_classifier(
         n_jobs=n_jobs,
         verbose=1,
     )
+    search.fit(X, y)
 
+    return search.best_estimator_
+
+
+def train_hist_gradient_boosting_classifier(
+    df,
+    n_iter=100,
+    cv=3,
+    scoring='balanced_accuracy',
+    random_state=42,
+    n_jobs=-1,
+):
+    """
+    Tune and train a HistGradientBoostingClassifier.
+
+    The last DataFrame column is the target; preceding columns are features.
+
+    Returns
+    -------
+    HistGradientBoostingClassifier
+        The best fitted classifier from the randomized search.
+    """
+    from scipy.stats import loguniform, randint, uniform
+
+    X = df.iloc[:, :-1]
+    y = df.iloc[:, -1]
+
+    classifier = HistGradientBoostingClassifier(
+        class_weight='balanced',
+        random_state=random_state,
+        early_stopping=False,
+    )
+    param_distributions = {
+        'learning_rate': loguniform(0.01, 0.3),
+        'max_iter': randint(100, 501),
+        'max_leaf_nodes': randint(15, 64),
+        'max_depth': [None, 3, 5, 10, 15],
+        'min_samples_leaf': randint(10, 51),
+        'l2_regularization': loguniform(1e-6, 10),
+        'max_features': uniform(0.5, 0.5),
+    }
+    cv_strategy = StratifiedKFold(
+        n_splits=cv,
+        shuffle=True,
+        random_state=random_state,
+    )
+    search = RandomizedSearchCV(
+        estimator=classifier,
+        param_distributions=param_distributions,
+        n_iter=n_iter,
+        scoring=scoring,
+        cv=cv_strategy,
+        refit=True,
+        random_state=random_state,
+        n_jobs=n_jobs,
+        verbose=1,
+    )
+    search.fit(X, y)
+
+    return search.best_estimator_
+
+
+def train_random_forest_classifier(
+    df,
+    n_iter=100,
+    cv=3,
+    scoring='balanced_accuracy',
+    random_state=42,
+    n_jobs=-1,
+):
+    """
+    Tune and train a class-weighted RandomForestClassifier.
+
+    The last DataFrame column is the target; preceding columns are features.
+
+    Returns
+    -------
+    RandomForestClassifier
+        The best fitted classifier from the randomized search.
+    """
+    from scipy.stats import randint
+
+    X = df.iloc[:, :-1]
+    y = df.iloc[:, -1]
+
+    classifier = RandomForestClassifier(
+        class_weight='balanced',
+        random_state=random_state,
+        n_jobs=1,  # Avoid nested parallelism; the search uses n_jobs.
+    )
+    param_distributions = {
+        'n_estimators': randint(200, 1000),
+        'max_depth': [None, 5, 10, 20, 30, 50],
+        'min_samples_split': randint(2, 20),
+        'min_samples_leaf': randint(1, 10),
+        'max_features': ['sqrt', 'log2', None, 0.5, 0.75, 1.0],
+        'criterion': ['gini', 'entropy', 'log_loss'],
+        'bootstrap': [False, True],
+    }
+    cv_strategy = StratifiedKFold(
+        n_splits=cv,
+        shuffle=True,
+        random_state=random_state,
+    )
+    search = RandomizedSearchCV(
+        estimator=classifier,
+        param_distributions=param_distributions,
+        n_iter=n_iter,
+        scoring=scoring,
+        cv=cv_strategy,
+        refit=True,
+        random_state=random_state,
+        n_jobs=n_jobs,
+        verbose=1,
+    )
     search.fit(X, y)
 
     return search.best_estimator_
@@ -1023,7 +1142,8 @@ def calibrate_model(base_model, df):
     calibrated_model = CalibratedClassifierCV(
         estimator=base_model,
         method='sigmoid',
-        cv=3
+        ensemble=True,
+        cv=3,
     )
     calibrated_model.fit(X, y)
 
@@ -1056,6 +1176,7 @@ def tune_model_threshold(model, df, scoring='roc_auc'):
 
     tuned_clf = TunedThresholdClassifierCV(
         model,
+        cv=3,
         scoring=scoring,
         response_method='predict_proba',
         n_jobs=-1
@@ -1157,7 +1278,7 @@ def roc_curve(y_true, y_score, save_fig=False):
     plt.show()
 
 
-def evaluate_extra_trees_classifier(model, test_df, thr=None, **kwargs):
+def evaluate_classifier(model, test_df, thr=None, **kwargs):
     """
     Compare model predictions with true labels in test_df.
 
